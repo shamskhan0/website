@@ -4,6 +4,7 @@ import './brand.css'
 import './hero-theme.css'
 import './center-hero.css'
 import './login-theme.css'
+import AdBanner from './AdBanner'
 
 export interface NewsItem {
   id: string
@@ -432,6 +433,9 @@ function App() {
           </div>
         </section>
 
+        {/* ── Ad Banner 1 — Between Features & App Section ── */}
+        <AdBanner adSlot="1647148762" adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
+
         <section className="app-section" id="app">
           <div className="app-visual">
             <div className="orbit orbit-one"></div>
@@ -545,6 +549,9 @@ function App() {
           </div>
         </section>
 
+        {/* ── Ad Banner 2 — Between News & Contact Section ── */}
+        <AdBanner adSlot="1647148762" adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
+
         <section className="contact-section" id="contact">
           <div>
             <p className="eyebrow">WE'RE HERE TO HELP <span></span></p>
@@ -555,6 +562,9 @@ function App() {
           </a>
         </section>
       </main>
+
+      {/* ── Ad Banner 3 — Above Footer ── */}
+      <AdBanner adSlot="1647148762" adFormat="horizontal" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
 
       <footer>
         <div className="footer-main">
