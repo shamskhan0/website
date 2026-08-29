@@ -1,0 +1,143 @@
+export const INITIAL_FEATURES = [
+  {
+    icon: '✦',
+    title: 'Fast & reliable',
+    text: 'A smooth experience built for everyday digital services and instant AI transactions.',
+    image: '/features/fast-reliable.jpg',
+  },
+  {
+    icon: '⌁',
+    title: 'Secure by design',
+    text: 'Thoughtful 256-bit cryptographic protection keeps your digital life in trusted hands.',
+    image: '/features/secure-by-design.jpg',
+  },
+  {
+    icon: '◌',
+    title: 'Easy to use',
+    text: 'Clear, friendly tools and real-time dashboards that help you get more done effortlessly.',
+    image: '/features/easy-to-use.jpg',
+  },
+  {
+    icon: '↗',
+    title: 'Always improving',
+    text: 'Regular continuous releases bring useful automated features and machine learning refinements.',
+    image: '/features/always-improving.jpg',
+  },
+]
+
+import type { NewsItem, ApkVersion, SiteSettings } from './types'
+
+export const INITIAL_NEWS: NewsItem[] = [
+  {
+    id: 'news-kyc',
+    date: '27 AUG 2026',
+    title: 'Your Next Step: Complete Your KYC',
+    text: 'Complete your KYC verification to unlock the next step of your Roshan Digital journey. Verify your identity securely and keep your account information accurate and up to date.',
+    tag: 'KYC VERIFICATION',
+    color: 'emerald',
+    featured: true,
+    readTime: '2 MIN VERIFY',
+    author: 'Roshan Digital Security & Compliance',
+    highlights: ['Government ID & Passport Sync', 'Instant Biometric Liveness Scan', 'Bank-Grade 256-bit Encryption'],
+    imageUrl: '/news/kyc-verification.jpg',
+    ctaText: 'Complete KYC →',
+  },
+  {
+    id: 'news-featured',
+    date: '27 AUG 2026',
+    title: 'The Next Leap: How AI-Driven Wealth Intelligence is Transforming Daily Digital Profits',
+    text: 'Our version 2.0 release combines military-grade encryption with predictive neural trading algorithms to safeguard assets while generating consistent daily returns.',
+    tag: 'AI & FINANCIAL INTELLIGENCE',
+    color: 'emerald',
+    featured: false,
+    readTime: '4 MIN READ',
+    author: 'Roshan Digital Intelligence',
+    highlights: ['+18.4% Monthly Alpha', '256-bit AES Cryptography', 'Zero-Knowledge Privacy'],
+    imageUrl: '/news/featured-ai-wealth.jpg',
+  },
+  {
+    id: 'news-1',
+    date: '27 AUG 2026',
+    title: 'Roshan Digital App v2.0 is here',
+    text: 'A faster dashboard, improved security and a more intuitive mobile experience for all users.',
+    tag: 'PRODUCT UPDATE',
+    color: 'violet',
+    imageUrl: '/news/app-release-v2.jpg',
+  },
+  {
+    id: 'news-2',
+    date: '18 AUG 2026',
+    title: 'Your digital journey, simplified',
+    text: 'Discover the smart analytics and tools designed to make your everyday services feel effortless.',
+    tag: 'INSIGHTS',
+    color: 'blue',
+    imageUrl: '/news/digital-journey.jpg',
+  },
+  {
+    id: 'news-3',
+    date: '04 AUG 2026',
+    title: 'Building trust through every tap',
+    text: 'How Roshan Digital keeps security and people at the centre of every update we ship.',
+    tag: 'OUR STORY',
+    color: 'gold',
+    imageUrl: '/news/cyber-trust.jpg',
+  },
+]
+
+export const INITIAL_APK_VERSIONS: ApkVersion[] = [
+  {
+    id: 'apk-1',
+    version: '2.0.0',
+    build: 200,
+    releaseDate: '27 August 2026',
+    size: '48.6 MB',
+    status: 'LIVE',
+    minAndroid: '8.0 and above',
+    downloads: 12450,
+    sha256: '9f83a8b27c6d1e405a38b4c59d72e6f1a8b9c0d2e4f6a8b0c2d4e6f8a0b2c4d6',
+    changelog: [
+      'Faster, more intuitive AI portfolio dashboard',
+      'Improved military-grade security and performance',
+      'A smoother mobile experience for instant releases',
+    ],
+    downloadUrl: '/roshan-digital-v2.0.0.apk',
+  },
+  {
+    id: 'apk-2',
+    version: '1.9.4',
+    build: 194,
+    releaseDate: '18 August 2026',
+    size: '46.2 MB',
+    status: 'ARCHIVED',
+    minAndroid: '8.0 and above',
+    downloads: 8920,
+    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    changelog: ['Fixed portfolio balance sync issue', 'Improved battery efficiency on Android 13+'],
+    downloadUrl: '/roshan-digital-v2.0.0.apk',
+  },
+  {
+    id: 'apk-3',
+    version: '1.9.0',
+    build: 190,
+    releaseDate: '04 August 2026',
+    size: '44.8 MB',
+    status: 'ARCHIVED',
+    minAndroid: '8.0 and above',
+    downloads: 15300,
+    sha256: '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae',
+    changelog: ['Initial AI investment prediction engine integration', 'Biometric login overhaul'],
+    downloadUrl: '/roshan-digital-v2.0.0.apk',
+  },
+]
+
+export const INITIAL_SITE_SETTINGS: SiteSettings = {
+  announcementText: 'Latest update: Roshan Digital App v2.0 is now available',
+  announcementActive: true,
+  heroTitle: 'Roshan Digital.',
+  heroSubtitle:
+    'Your trusted AI-powered platform for secure investments, daily profits and convenient digital services wherever life takes you.',
+  supportEmail: 'support@roshandigital.com',
+  telegramLink: 'https://t.me/roshandigital',
+  apkDownloadUrl: '/roshan-digital-v2.0.0.apk',
+  maintenanceMode: false,
+}
