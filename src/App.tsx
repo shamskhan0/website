@@ -6,6 +6,14 @@ import './center-hero.css'
 import './login-theme.css'
 import AdBanner from './AdBanner'
 
+// ── Google AdSense Ad Slot IDs ──────────────────────────────────────────────
+// Replace each value below with the unique slot ID from your AdSense dashboard:
+//   https://adsense.google.com → Ads → By ad unit → Display ads → Create new
+const AD_SLOT_FEATURES     = '1647148762' // Ad unit 1 — Between Features & App sections
+const AD_SLOT_NEWS         = '1647148763' // Ad unit 2 — Between News & Contact sections
+const AD_SLOT_FOOTER       = '1647148764' // Ad unit 3 — Above Footer (horizontal banner)
+// ────────────────────────────────────────────────────────────────────────────
+
 export interface NewsItem {
   id: string
   date: string
@@ -215,7 +223,7 @@ const ADMIN_CREDENTIALS = [
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
-  const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | null>(null)
+  const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
   // Dynamic Data States saved in localStorage
@@ -434,7 +442,7 @@ function App() {
         </section>
 
         {/* ── Ad Banner 1 — Between Features & App Section ── */}
-        <AdBanner adSlot="1647148762" adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
+        <AdBanner adSlot={AD_SLOT_FEATURES} adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
 
         <section className="app-section" id="app">
           <div className="app-visual">
@@ -466,6 +474,112 @@ function App() {
               Download latest APK <span>↓</span>
             </a>
             <small className="android-note">For Android {liveApk.minAndroid} · APK file</small>
+
+            {/* ── Google Play Store Badge ── */}
+            {/* ── Official Google Play Store Badge ── */}
+            <div className="store-badges" style={{ marginTop: '24px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.roshandigital.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Get it on Google Play"
+                title="Get it on Google Play"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', background: '#000', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', padding: '10px 18px', textDecoration: 'none', minWidth: '180px' }}
+              >
+                <svg width="22" height="24" viewBox="0 0 22 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M0.431 0.366C0.163 0.648 0 1.084 0 1.65V22.35C0 22.916 0.163 23.352 0.431 23.634L0.503 23.704L12.09 12.117V11.883L0.503 0.296L0.431 0.366Z" fill="url(#pg0)"/>
+                  <path d="M16.013 15.941L12.09 12.117V11.883L16.013 8.059L16.104 8.11L20.747 10.746C22.084 11.504 22.084 12.742 20.747 13.5L16.104 16.136L16.013 15.941Z" fill="url(#pg1)"/>
+                  <path d="M16.104 16.136L12.09 12.117L0.431 23.634C0.872 24.098 1.598 24.155 2.41 23.697L16.104 16.136Z" fill="url(#pg2)"/>
+                  <path d="M16.104 8.11L2.41 0.549C1.598 0.091 0.872 0.148 0.431 0.612L12.09 12.117L16.104 8.11Z" fill="url(#pg3)"/>
+                  <defs>
+                    <linearGradient id="pg0" x1="11.133" y1="1.468" x2="-4.647" y2="17.248" gradientUnits="userSpaceOnUse"><stop stopColor="#00A0FF"/><stop offset="1" stopColor="#00E3FF"/></linearGradient>
+                    <linearGradient id="pg1" x1="22.814" y1="12" x2="-0.176" y2="12" gradientUnits="userSpaceOnUse"><stop stopColor="#FFE000"/><stop offset="1" stopColor="#FF9C00"/></linearGradient>
+                    <linearGradient id="pg2" x1="14.081" y1="14.297" x2="-7.118" y2="35.497" gradientUnits="userSpaceOnUse"><stop stopColor="#FF3A44"/><stop offset="1" stopColor="#C31162"/></linearGradient>
+                    <linearGradient id="pg3" x1="-1.952" y1="-7.44" x2="7.849" y2="2.362" gradientUnits="userSpaceOnUse"><stop stopColor="#32A071"/><stop offset="1" stopColor="#00F076"/></linearGradient>
+                  </defs>
+                </svg>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.5px', lineHeight: 1 }}>GET IT ON</span>
+                  <span style={{ fontSize: '18px', color: '#fff', fontWeight: 600, letterSpacing: '-0.3px', lineHeight: 1.2 }}>Google Play</span>
+                </div>
+              </a>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: '12px', color: 'var(--emerald)', fontWeight: 700, letterSpacing: '0.5px' }}>▲ COMING SOON</span>
+                <span style={{ fontSize: '12px', color: 'var(--muted)', lineHeight: 1.5 }}>Play Store listing in review.<br />Download APK directly above.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── App Screenshots Section ── */}
+        <section className="section" style={{ background: 'rgba(15,23,42,0.6)', padding: '60px 24px' }}>
+          <div className="section-heading" style={{ textAlign: 'center', marginBottom: '36px' }}>
+            <p className="eyebrow">APP EXPERIENCE <span></span></p>
+            <h2>Designed for<br /><em>clarity & control.</em></h2>
+            <p>A glimpse into the powerful, intuitive world of Roshan Digital.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', maxWidth: '960px', margin: '0 auto' }}>
+            {[
+              { src: '/features/fast-reliable.jpg', label: 'Fast & Reliable Dashboard' },
+              { src: '/features/secure-by-design.jpg', label: 'Secure by Design' },
+              { src: '/features/easy-to-use.jpg', label: 'Easy to Use' },
+              { src: '/features/always-improving.jpg', label: 'Always Improving' },
+            ].map((shot) => (
+              <figure key={shot.label} style={{ margin: 0, borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
+                <img
+                  src={shot.src}
+                  alt={shot.label}
+                  loading="lazy"
+                  style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+                />
+                <figcaption style={{ padding: '10px 14px', fontSize: '12px', color: 'var(--muted)', background: 'rgba(15,23,42,0.9)', letterSpacing: '0.5px' }}>
+                  {shot.label}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Data Safety Section (Required by Google Play Store) ── */}
+        <section className="section" id="data-safety" style={{ padding: '72px 24px', background: 'linear-gradient(180deg, rgba(16,185,129,0.04) 0%, rgba(15,23,42,0) 100%)' }}>
+          <div className="section-heading" style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <p className="eyebrow">GOOGLE PLAY DATA SAFETY <span></span></p>
+            <h2>Your data,<br /><em>your control.</em></h2>
+            <p>Transparent summary of how Roshan Digital collects, uses and protects your information — as required by Google Play's Data Safety policy.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', maxWidth: '1040px', margin: '0 auto 40px' }}>
+            <div style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}><span style={{ fontSize: '24px' }}>📦</span><h3 style={{ margin: 0, fontSize: '16px', color: '#fff' }}>Data Collected</h3></div>
+              {[['Account info', 'Name, email, phone'],['Financial data', 'Investment records (encrypted)'],['Device identifiers', 'Model, OS version'],['Crash telemetry', 'Anonymous diagnostics'],['Biometric (KYC only)', 'Not retained after verification']].map(([label, detail]) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#cbd5e1' }}>{label}</span>
+                  <span style={{ fontSize: '12px', color: 'var(--muted)', textAlign: 'right' }}>{detail}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}><span style={{ fontSize: '24px' }}>🔒</span><h3 style={{ margin: 0, fontSize: '16px', color: '#fff' }}>Data Sharing</h3></div>
+              {[['Sold to third parties', false],['Shared with advertisers', false],['Google AdSense (website ads)', true],['Regulatory authorities (if required)', true]] .map(([label, value]) => (
+                <div key={String(label)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#cbd5e1' }}>{label}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: value ? 'var(--emerald)' : '#ef4444' }}>{value ? '✓ Yes' : '✗ No'}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}><span style={{ fontSize: '24px' }}>🛡️</span><h3 style={{ margin: 0, fontSize: '16px', color: '#fff' }}>Security & Rights</h3></div>
+              {[['Encrypted in transit', true],['Encrypted at rest', true],['Request data deletion', true],['Children under 13 targeted', false]].map(([label, value]) => (
+                <div key={String(label)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#cbd5e1' }}>{label}</span>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: value ? 'var(--emerald)' : '#ef4444' }}>{value ? '✓ Yes' : '✗ No'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '16px', padding: '28px 24px', maxWidth: '560px', margin: '0 auto' }}>
+            <h3 style={{ margin: '0 0 10px', color: '#fff', fontSize: '17px' }}>Request Data Deletion</h3>
+            <p style={{ margin: '0 0 18px', fontSize: '13px', color: '#94a3b8', lineHeight: 1.6 }}>Under Google Play's policy, you can request deletion of your account and all associated personal data at any time.</p>
+            <a href="mailto:privacy@roshandigital.com?subject=Data%20Deletion%20Request&body=Please%20delete%20my%20account%20and%20all%20associated%20data." className="button button-primary" style={{ display: 'inline-block' }}>Request Account Deletion ↗</a>
           </div>
         </section>
 
@@ -550,7 +664,7 @@ function App() {
         </section>
 
         {/* ── Ad Banner 2 — Between News & Contact Section ── */}
-        <AdBanner adSlot="1647148762" adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
+        <AdBanner adSlot={AD_SLOT_NEWS} adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
 
         <section className="contact-section" id="contact">
           <div>
@@ -564,7 +678,7 @@ function App() {
       </main>
 
       {/* ── Ad Banner 3 — Above Footer ── */}
-      <AdBanner adSlot="1647148762" adFormat="horizontal" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
+      <AdBanner adSlot={AD_SLOT_FOOTER} adFormat="horizontal" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
 
       <footer>
         <div className="footer-main">
@@ -585,7 +699,9 @@ function App() {
               <b>Support</b>
               <a href="#help" onClick={(e) => { e.preventDefault(); setActiveModal('help') }}>Help centre</a>
               <a href="#contact">Contact us</a>
-              <a href="#privacy" onClick={(e) => { e.preventDefault(); setActiveModal('privacy') }}>Privacy policy</a>
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy policy ↗</a>
+              <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of service ↗</a>
+              <a href="/#data-safety">Data safety</a>
             </div>
           </div>
         </div>
@@ -600,6 +716,7 @@ function App() {
       {activeModal === 'privacy' && <PrivacyPolicyModal onClose={() => setActiveModal(null)} />}
       {activeModal === 'help' && <HelpCenterModal onClose={() => setActiveModal(null)} />}
       {activeModal === 'about' && <AboutModal onClose={() => setActiveModal(null)} />}
+      {activeModal === 'terms' && <TermsOfServiceModal onClose={() => setActiveModal(null)} />}
       {selectedArticle && <ArticleReaderModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
     </div>
   )
@@ -721,18 +838,48 @@ function PrivacyPolicyModal({ onClose }: { onClose: () => void }) {
             <li><strong>Account Information:</strong> Name, verified email address, phone number, and security credentials.</li>
             <li><strong>Financial Analytics:</strong> Secure investment transaction records and analytics logs encrypted end-to-end.</li>
             <li><strong>Device & Usage Data:</strong> IP address, device model, operating system version, and anonymous crash telemetry.</li>
+            <li><strong>Biometric Data (KYC):</strong> Facial scan data used solely for identity verification — not stored beyond verification completion.</li>
+            <li><strong>Location Data:</strong> General region data for regulatory compliance only. Precise GPS is never collected.</li>
           </ul>
 
-          <h3>2. How We Protect Your Data</h3>
+          <h3>2. How We Use Your Data</h3>
+          <ul>
+            <li>Provide, maintain, and improve our AI investment services</li>
+            <li>Verify your identity and prevent fraudulent activity</li>
+            <li>Send important service notifications and security alerts</li>
+            <li>Comply with applicable financial regulations and legal obligations</li>
+            <li>Analyse anonymous usage patterns to improve app performance</li>
+          </ul>
+
+          <h3>3. How We Protect Your Data</h3>
           <p>All sensitive communications and database storage utilize AES-256 and TLS 1.3 cryptographic encryption. We strictly implement zero-knowledge architecture for user credentials and automated AI models.</p>
 
-          <h3>3. Data Sharing & Third Parties</h3>
-          <p>We do not sell, rent, or trade your personal or financial data to any third parties or advertising brokers. Data is only processed to execute authorized platform features and regulatory compliance.</p>
+          <h3>4. Third-Party Services & SDKs</h3>
+          <p>Our application and website integrate the following third-party services, each with their own privacy practices:</p>
+          <ul>
+            <li><strong>Google AdSense:</strong> Displays advertising on our website. Google may use cookies to serve relevant ads. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--emerald)' }}>Google's Privacy Policy</a>.</li>
+            <li><strong>Google Analytics (if enabled):</strong> Anonymous traffic analysis. Data is anonymised before processing.</li>
+          </ul>
+          <p>We do not sell, rent, or trade your personal or financial data to any third parties or advertising brokers beyond the disclosures above.</p>
 
-          <h3>4. Your Rights</h3>
-          <p>You retain full rights to inspect, update, export, or request the deletion of your account records at any time through our settings or support center.</p>
+          <h3>5. Data Retention</h3>
+          <p>We retain your personal data only as long as necessary to provide our services or as required by law. Account data is deleted within 30 days of account closure upon request.</p>
 
-          <h3>5. Contact Our Privacy Officer</h3>
+          <h3>6. Your Rights — Data Deletion Request</h3>
+          <p>You have the right to request deletion of your personal data at any time. To submit a deletion request:</p>
+          <ul>
+            <li>Email: <a href="mailto:privacy@roshandigital.com" style={{ color: 'var(--emerald)', textDecoration: 'underline' }}>privacy@roshandigital.com</a> with subject <strong>"Data Deletion Request"</strong></li>
+            <li>We will process your request within 30 days and confirm deletion via email</li>
+          </ul>
+          <p>You also retain rights to: <strong>access</strong> your data, <strong>correct</strong> inaccurate data, <strong>port</strong> your data to another service, and <strong>object</strong> to certain processing (GDPR / CCPA applicable users).</p>
+
+          <h3>7. Children's Privacy (COPPA)</h3>
+          <p>Roshan Digital services are not directed to children under the age of 18. We do not knowingly collect personal information from minors. If you believe a minor has provided us data, contact <a href="mailto:privacy@roshandigital.com" style={{ color: 'var(--emerald)' }}>privacy@roshandigital.com</a> immediately.</p>
+
+          <h3>8. Changes to This Policy</h3>
+          <p>We may update this policy periodically. We will notify users of significant changes via in-app notification or email. Continued use of the service constitutes acceptance of the updated policy.</p>
+
+          <h3>9. Contact Our Privacy Officer</h3>
           <p>For any privacy inquiries or formal data requests, contact: <a href="mailto:privacy@roshandigital.com" style={{ color: 'var(--emerald)', textDecoration: 'underline' }}>privacy@roshandigital.com</a>.</p>
         </div>
         <footer className="modal-footer">
@@ -840,6 +987,98 @@ function AboutModal({ onClose }: { onClose: () => void }) {
         </div>
         <footer className="modal-footer">
           <button className="button button-primary" onClick={onClose}>Back to Website</button>
+        </footer>
+      </div>
+    </div>
+  )
+}
+
+function TermsOfServiceModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-window" onClick={(e) => e.stopPropagation()}>
+        <header className="modal-header">
+          <div className="modal-title-lockup">
+            <img src="/roshan-digital-logo-transparent.png" alt="Roshan Digital" />
+            <div>
+              <h2>Terms of Service</h2>
+              <p>Roshan Digital User Agreement</p>
+            </div>
+          </div>
+          <button className="modal-close" onClick={onClose} aria-label="Close modal">×</button>
+        </header>
+        <div className="modal-body">
+          <p><strong>Effective Date:</strong> August 27, 2026</p>
+          <p>
+            By downloading, installing, or using the Roshan Digital application or website, you agree to
+            be bound by these Terms of Service. Please read them carefully before proceeding.
+          </p>
+
+          <h3>1. Acceptance of Terms</h3>
+          <p>
+            By accessing or using any part of Roshan Digital's services, you confirm that you are at
+            least 18 years of age, legally capable of entering into binding agreements, and agree to
+            comply with these terms and all applicable laws and regulations.
+          </p>
+
+          <h3>2. Use of Services</h3>
+          <p>
+            Roshan Digital grants you a limited, non-exclusive, non-transferable licence to use our
+            application and services for lawful personal purposes. You agree not to misuse, reverse
+            engineer, or attempt unauthorised access to any part of our platform.
+          </p>
+
+          <h3>3. Investment Disclaimer</h3>
+          <p>
+            All AI-generated insights, portfolio recommendations, and return projections are provided for
+            informational purposes only and do not constitute financial or investment advice. Past
+            performance does not guarantee future results. Always consult a certified financial advisor
+            before making investment decisions.
+          </p>
+
+          <h3>4. Account Responsibility</h3>
+          <p>
+            You are fully responsible for maintaining the confidentiality of your account credentials.
+            Roshan Digital is not liable for any loss arising from unauthorised use of your account due
+            to your failure to keep login details secure.
+          </p>
+
+          <h3>5. Intellectual Property</h3>
+          <p>
+            All content, branding, code, and designs within the Roshan Digital platform are the exclusive
+            intellectual property of Roshan Digital. Unauthorised reproduction or distribution is
+            strictly prohibited.
+          </p>
+
+          <h3>6. Limitation of Liability</h3>
+          <p>
+            To the maximum extent permitted by law, Roshan Digital shall not be liable for indirect,
+            incidental, or consequential damages arising from your use of our services, including loss of
+            profits or data.
+          </p>
+
+          <h3>7. Modifications to Terms</h3>
+          <p>
+            We reserve the right to update these terms at any time. Continued use of the service after
+            changes are posted constitutes your acceptance of the revised terms.
+          </p>
+
+          <h3>8. Governing Law</h3>
+          <p>
+            These terms are governed by and construed in accordance with the laws of Pakistan.
+            Any disputes shall be subject to the exclusive jurisdiction of the courts of Pakistan.
+          </p>
+
+          <h3>9. Contact</h3>
+          <p>
+            For any questions about these Terms of Service, contact us at:{' '}
+            <a href="mailto:legal@roshandigital.com" style={{ color: 'var(--emerald)', textDecoration: 'underline' }}>
+              legal@roshandigital.com
+            </a>
+          </p>
+        </div>
+        <footer className="modal-footer">
+          <button className="button button-primary" onClick={onClose}>I Agree & Close</button>
         </footer>
       </div>
     </div>

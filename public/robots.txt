@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Allow Google AdSense crawler
+User-agent: Mediapartners-Google
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.roshandigital.com/sitemap.xml
+

@@ -1,0 +1,49 @@
+{
+  "name": "Roshan Digital — Secure Investments & AI Decisions",
+  "short_name": "Roshan Digital",
+  "description": "Your trusted AI-powered platform for secure investments, daily profits and convenient digital services.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/roshan-digital-logo-transparent.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/roshan-digital-logo-transparent.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business", "utilities"],
+  "screenshots": [
+    {
+      "src": "/features/fast-reliable.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Fast & Reliable Dashboard"
+    },
+    {
+      "src": "/features/secure-by-design.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "label": "Secure by Design"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.roshandigital.app",
+      "id": "com.roshandigital.app"
+    }
+  ],
+  "prefer_related_applications": false
+}
+
