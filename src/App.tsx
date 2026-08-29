@@ -380,27 +380,49 @@ function App() {
           </div>
           <div className="hero-art reveal-delay">
             <div className="sun-disc"></div>
-            <div className="phone">
-              <div className="phone-speaker"></div>
-              <div className="phone-screen">
-                <div className="app-top"><span>9:41</span><span>•••</span></div>
-                <div className="welcome">Good morning,<strong>Ahmed.</strong></div>
-                <div className="balance-label">TOTAL PORTFOLIO <span>◉</span></div>
-                <div className="balance">Rs 248,500<small>.00</small></div>
-                <div className="balance-rule"></div>
-                <div className="phone-actions">
-                  <span>↗<small>Invest</small></span>
-                  <span>＋<small>Add money</small></span>
-                  <span>⌁<small>Activity</small></span>
-                </div>
-                <div className="insight">
-                  <span>✦</span>
-                  <p><b>AI Insights Active</b><br />Daily returns: +18.4% this month.</p>
-                </div>
+
+            {/* ── Real App Phone Mockup ── */}
+            <div className="phone phone-real">
+              {/* Phone notch / camera */}
+              <div className="phone-notch">
+                <div className="phone-notch-camera"></div>
+              </div>
+              {/* Side buttons */}
+              <div className="phone-btn phone-btn-vol-up"></div>
+              <div className="phone-btn phone-btn-vol-down"></div>
+              <div className="phone-btn phone-btn-power"></div>
+              {/* Real app screenshot fills the screen */}
+              <div className="phone-screen phone-screen-real">
+                <img
+                  src="/app-screenshot.jpg"
+                  alt="Roshan Digital App — Home Screen"
+                  className="phone-screenshot-img"
+                  draggable={false}
+                />
+              </div>
+              {/* Home indicator bar */}
+              <div className="phone-home-bar"></div>
+            </div>
+
+            {/* Floating stat badges around the phone */}
+            <div className="phone-badge phone-badge-left">
+              <span className="phone-badge-icon">📈</span>
+              <div>
+                <b>+18.4%</b>
+                <small>Monthly Return</small>
               </div>
             </div>
-            <div className="art-label label-one">SECURE<br /><b>BY DESIGN</b></div>
-            <div className="art-label label-two">ROSHAN<br /><b>DIGITAL</b></div>
+            <div className="phone-badge phone-badge-right">
+              <span className="phone-badge-icon">🔒</span>
+              <div>
+                <b>256-bit</b>
+                <small>AES Encrypted</small>
+              </div>
+            </div>
+            <div className="phone-badge phone-badge-bottom">
+              <span style={{ color: 'var(--emerald)', fontWeight: 800 }}>✦</span>
+              <small>AI Insights Active</small>
+            </div>
           </div>
         </section>
 
