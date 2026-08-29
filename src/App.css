@@ -378,23 +378,24 @@ em {
    REAL APP SCREENSHOT PHONE MOCKUP
    ════════════════════════════════════════════════════ */
 
+/* Outer shell — no overflow:hidden so side buttons stick out */
 .phone-real {
   width: 248px;
   height: 500px;
-  background: linear-gradient(160deg, #1a1f2e 0%, #0d1117 100%);
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  border-radius: 42px;
+  background: linear-gradient(160deg, #1c2133 0%, #0d1117 100%);
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-radius: 44px;
   transform: rotate(5deg);
   z-index: 2;
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
     0 0 60px rgba(16, 185, 129, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  padding: 0;
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  padding: 6px;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
   position: relative;
-  overflow: hidden;
+  /* NO overflow:hidden here — side buttons must stick out */
 }
 
 .phone-real:hover {
@@ -402,78 +403,80 @@ em {
   box-shadow:
     0 55px 100px rgba(0, 0, 0, 0.9),
     0 0 80px rgba(16, 185, 129, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-/* Notch */
+/* Notch sits on top of the screen */
 .phone-notch {
   position: absolute;
-  top: 12px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90px;
-  height: 22px;
+  width: 88px;
+  height: 24px;
   background: #080c14;
-  border-radius: 0 0 16px 16px;
-  z-index: 10;
+  border-radius: 0 0 18px 18px;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.07);
   border-top: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 
 .phone-notch-camera {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: #1a2035;
-  border: 2px solid rgba(255,255,255,0.1);
-  box-shadow: 0 0 6px rgba(6, 182, 212, 0.3);
+  background: #12192a;
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 6px rgba(6, 182, 212, 0.35);
 }
 
-/* Side Buttons */
+/* Side Buttons — positioned on outer shell, stick outside */
 .phone-btn {
   position: absolute;
-  background: linear-gradient(180deg, #1e2740 0%, #141927 100%);
-  border-radius: 3px;
-  z-index: 5;
+  background: linear-gradient(180deg, #222b40 0%, #141927 100%);
+  border-radius: 2px 0 0 2px;
+  z-index: 1;
 }
 
 .phone-btn-vol-up {
-  left: -3px;
-  top: 100px;
-  width: 3px;
-  height: 36px;
-  box-shadow: -1px 0 4px rgba(0,0,0,0.5);
+  left: -5px;
+  top: 108px;
+  width: 5px;
+  height: 34px;
+  border-radius: 3px 0 0 3px;
+  box-shadow: -2px 0 6px rgba(0,0,0,0.6);
 }
 
 .phone-btn-vol-down {
-  left: -3px;
-  top: 148px;
-  width: 3px;
-  height: 36px;
-  box-shadow: -1px 0 4px rgba(0,0,0,0.5);
+  left: -5px;
+  top: 154px;
+  width: 5px;
+  height: 34px;
+  border-radius: 3px 0 0 3px;
+  box-shadow: -2px 0 6px rgba(0,0,0,0.6);
 }
 
 .phone-btn-power {
-  right: -3px;
-  top: 120px;
-  width: 3px;
-  height: 52px;
-  box-shadow: 1px 0 4px rgba(0,0,0,0.5);
+  right: -5px;
+  top: 126px;
+  width: 5px;
+  height: 50px;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.6);
 }
 
-/* Screen — real screenshot fills it */
+/* ── Inner screen wrapper — this clips the image perfectly ── */
 .phone-screen-real {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 40px;
-  overflow: hidden;
-  background: #0a0f1a;
+  inset: 6px;                   /* matches the padding on phone-real */
+  border-radius: 38px;          /* slightly less than outer 44px */
+  overflow: hidden;             /* THIS clips the screenshot */
+  background: #080e18;
+  z-index: 5;
 }
 
 .phone-screenshot-img {
@@ -482,22 +485,22 @@ em {
   object-fit: cover;
   object-position: top center;
   display: block;
-  border-radius: 40px;
+  border-radius: 0;             /* parent handles clipping */
   user-select: none;
   pointer-events: none;
 }
 
-/* Home indicator */
+/* Home indicator — on top of screenshot */
 .phone-home-bar {
   position: absolute;
-  bottom: 10px;
+  bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90px;
+  width: 80px;
   height: 4px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 4px;
-  z-index: 10;
+  z-index: 25;
 }
 
 /* ── Floating Stat Badges ── */
@@ -506,14 +509,14 @@ em {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(13, 18, 32, 0.92);
   border: 1px solid rgba(16, 185, 129, 0.3);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 10px 14px;
   border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 20px rgba(16,185,129,0.1);
-  z-index: 4;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.55), 0 0 20px rgba(16,185,129,0.1);
+  z-index: 30;
   animation: badgeFloat 3s ease-in-out infinite;
 }
 
@@ -542,20 +545,20 @@ em {
 }
 
 .phone-badge-left {
-  left: -10px;
-  top: 90px;
+  left: -14px;
+  top: 80px;
   animation-delay: 0s;
 }
 
 .phone-badge-right {
-  right: -10px;
-  top: 200px;
+  right: -14px;
+  top: 210px;
   animation-delay: 1s;
 }
 
 .phone-badge-bottom {
-  bottom: 60px;
-  left: -20px;
+  bottom: 55px;
+  left: -18px;
   gap: 8px;
   padding: 8px 12px;
   border-color: rgba(16,185,129,0.4);
@@ -564,13 +567,15 @@ em {
 
 @keyframes badgeFloat {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+  50%       { transform: translateY(-6px); }
 }
 
 @media (max-width: 900px) {
   .phone-badge { display: none; }
-  .phone-real  { width: 200px; height: 400px; }
+  .phone-real  { width: 200px; height: 406px; padding: 5px; }
+  .phone-screen-real { inset: 5px; border-radius: 32px; }
 }
+
 
 .art-label {
   position: absolute;

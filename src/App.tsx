@@ -729,7 +729,7 @@ function App() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 Roshan Digital. All rights reserved.</span>
-          <button onClick={() => setAdminOpen(true)}>Admin login ↗</button>
+          <button onClick={() => setAdminOpen(true)}>Thanks you ↗</button>
           <span>Made for better days.</span>
         </div>
       </footer>
