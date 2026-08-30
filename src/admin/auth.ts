@@ -19,8 +19,8 @@ export interface AdminUser {
 // NOTE: this is client-side auth — the hashes ship in the JS bundle, so an
 // attacker could try to brute-force the original values. For real production,
 // replace this with a backend authentication endpoint.
-const EMAIL_HASH = import.meta.env.VITE_ADMIN_EMAIL_HASH ?? ''
-const PASSWORD_HASH = import.meta.env.VITE_ADMIN_PASSWORD_HASH ?? ''
+const EMAIL_HASH = import.meta.env.VITE_ADMIN_EMAIL_HASH ?? 'adbf4513b27b65d40ce04da577102905b66ef5f68a20fefe7e637c792d6ab45c'
+const PASSWORD_HASH = import.meta.env.VITE_ADMIN_PASSWORD_HASH ?? 'b94bd1aa5394532d4ffe288f38b4a4eaad82264e33d43824090cca261b25766f'
 
 async function sha256Hex(value: string): Promise<string> {
   const data = new TextEncoder().encode(value)
@@ -31,7 +31,7 @@ async function sha256Hex(value: string): Promise<string> {
 }
 
 const ADMIN_PROFILE: AdminUser = {
-  name: import.meta.env.VITE_ADMIN_NAME ?? 'Administrator',
+  name: import.meta.env.VITE_ADMIN_NAME ?? 'Shams Khan',
   email: 'admin@roshandigital.local',
   role: 'Super administrator',
   avatar: 'SK',
