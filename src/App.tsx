@@ -18,7 +18,7 @@ import type { AdminUser } from './admin/auth'
 
 import type { NewsItem, ApkVersion, SiteSettings } from './types'
 import { INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
-import { loadPersisted } from './persistence'
+import { loadPersisted, usePersistedState } from './persistence'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
@@ -58,34 +58,27 @@ function App() {
   const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
-  // Dynamic Data States saved in localStorage (validated + safe fallback)
-  const [newsList, setNewsList] = useState<NewsItem[]>(
-    () => loadPersisted('rd_news_data_v3', INITIAL_NEWS, isNewsList),
-  )
+  // Dynamic Data States saved in localStorage (validated + safe fallback).
+  // usePersistedState writes through to localStorage on every update.
+  const [newsList, setNewsList] = usePersistedState('rd_news_data_v3', INITIAL_NEWS, isNewsList)
 
-  const [apkVersions, setApkVersions] = useState<ApkVersion[]>(
-    () => loadPersisted('rd_apk_versions', INITIAL_APK_VERSIONS, isApkVersions),
-  )
+  const [apkVersions, setApkVersions] = usePersistedState('rd_apk_versions', INITIAL_APK_VERSIONS, isApkVersions)
 
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(
-    () => loadPersisted('rd_site_settings', INITIAL_SITE_SETTINGS, isSiteSettings),
-  )
+  const [siteSettings, setSiteSettings] = usePersistedState('rd_site_settings', INITIAL_SITE_SETTINGS, isSiteSettings)
 
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(
     () => loadPersisted<AdminUser | null>('rd_admin_session', null, isAdminUser),
   )
-  const [adminLoggedIn, setAdminLoggedIn] = useState(() => {
-    return Boolean(localStorage.getItem('rd_admin_session'))
-  })
+  // Derived from the validated currentUser so a corrupt/tampered session
+  // always routes to the login screen instead of a dashboard with no user.
+  const adminLoggedIn = currentUser !== null
   const [activeAdmin, setActiveAdmin] = useState('Dashboard')
 
   // Live active APK
   const liveApk = apkVersions.find((v) => v.status === 'LIVE') || apkVersions[0]
 
-
   const handleLogin = (user: AdminUser) => {
     setCurrentUser(user)
-    setAdminLoggedIn(true)
   }
 
   const handleLogout = () => {
@@ -95,36 +88,7 @@ function App() {
       // ignore
     }
     setCurrentUser(null)
-    setAdminLoggedIn(false)
     setAdminOpen(false)
-  }
-
-  // Update helper functions
-  const updateNewsList = (newItems: NewsItem[]) => {
-    setNewsList(newItems)
-    try {
-      localStorage.setItem('rd_news_data_v3', JSON.stringify(newItems))
-    } catch {
-      // ignore
-    }
-  }
-
-  const updateApkVersions = (newVersions: ApkVersion[]) => {
-    setApkVersions(newVersions)
-    try {
-      localStorage.setItem('rd_apk_versions', JSON.stringify(newVersions))
-    } catch {
-      // ignore
-    }
-  }
-
-  const updateSiteSettings = (newSettings: SiteSettings) => {
-    setSiteSettings(newSettings)
-    try {
-      localStorage.setItem('rd_site_settings', JSON.stringify(newSettings))
-    } catch {
-      // ignore
-    }
   }
 
   if (adminOpen) {
@@ -138,11 +102,11 @@ function App() {
         active={activeAdmin}
         setActive={setActiveAdmin}
         newsList={newsList}
-        setNewsList={updateNewsList}
+        setNewsList={setNewsList}
         apkVersions={apkVersions}
-        setApkVersions={updateApkVersions}
+        setApkVersions={setApkVersions}
         siteSettings={siteSettings}
-        setSiteSettings={updateSiteSettings}
+        setSiteSettings={setSiteSettings}
       />
     )
   }
