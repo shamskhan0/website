@@ -6,7 +6,7 @@ import { AdminVersionHistory } from './tabs/AdminVersionHistory'
 import { AdminNewsManagement } from './tabs/AdminNewsManagement'
 import { AdminDownloadsAnalytics } from './tabs/AdminDownloadsAnalytics'
 import { AdminWebsiteSettings } from './tabs/AdminWebsiteSettings'
-import type { NewsItem, ApkVersion, SiteSettings } from '../types'
+import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from '../types'
 
 export function AdminLogin({ onLogin, onExit }: { onLogin: (user: AdminUser) => void; onExit: () => void }) {
   const [email, setEmail] = useState('')
@@ -121,6 +121,8 @@ export function AdminDashboard({
   active,
   setActive,
   user,
+  featuresList,
+  setFeaturesList,
   newsList,
   setNewsList,
   apkVersions,
@@ -132,6 +134,8 @@ export function AdminDashboard({
   active: string
   setActive: (item: string) => void
   user: AdminUser | null
+  featuresList: FeatureItem[]
+  setFeaturesList: (items: FeatureItem[]) => void
   newsList: NewsItem[]
   setNewsList: (items: NewsItem[]) => void
   apkVersions: ApkVersion[]
@@ -139,7 +143,7 @@ export function AdminDashboard({
   siteSettings: SiteSettings
   setSiteSettings: (settings: SiteSettings) => void
 }) {
-  const menu = ['Dashboard', 'APK management', 'Version history', 'News management', 'Downloads', 'Website settings']
+  const menu = ['Dashboard', 'Feature management', 'APK management', 'Version history', 'News management', 'Downloads', 'Website settings']
   const displayName = user?.name ?? 'Administrator'
   const displayRole = user?.role ?? 'Administrator'
   const displayAvatar = user?.avatar ?? '—'
@@ -175,7 +179,7 @@ export function AdminDashboard({
         <div className="admin-menu">
           {menu.map((item, index) => (
             <button className={active === item ? 'active' : ''} key={item} onClick={() => setActive(item)}>
-              <span>{['▦', '↥', '◷', '▤', '◒', '⚙'][index]}</span>
+              <span>{['▦', '✦', '↥', '◷', '▤', '◒', '⚙'][index]}</span>
               {item}
             </button>
           ))}
@@ -217,7 +221,18 @@ export function AdminDashboard({
           />
         )}
 
-        {/* 2. APK MANAGEMENT */}
+        {/* 2. FEATURE MANAGEMENT */}
+        {active === 'Feature management' && (
+          <AdminNewsManagement
+            featuresList={featuresList}
+            setFeaturesList={setFeaturesList}
+            newsList={newsList}
+            setNewsList={setNewsList}
+            showToast={showToast}
+          />
+        )}
+
+        {/* 3. APK MANAGEMENT */}
         {active === 'APK management' && (
           <AdminApkManagement
             apkVersions={apkVersions}
@@ -227,7 +242,7 @@ export function AdminDashboard({
           />
         )}
 
-        {/* 3. VERSION HISTORY */}
+        {/* 4. VERSION HISTORY */}
         {active === 'Version history' && (
           <AdminVersionHistory
             apkVersions={apkVersions}
@@ -236,16 +251,18 @@ export function AdminDashboard({
           />
         )}
 
-        {/* 4. NEWS MANAGEMENT */}
+        {/* 5. NEWS MANAGEMENT */}
         {active === 'News management' && (
           <AdminNewsManagement
+            featuresList={featuresList}
+            setFeaturesList={setFeaturesList}
             newsList={newsList}
             setNewsList={setNewsList}
             showToast={showToast}
           />
         )}
 
-        {/* 5. DOWNLOADS ANALYTICS */}
+        {/* 6. DOWNLOADS ANALYTICS */}
         {active === 'Downloads' && (
           <AdminDownloadsAnalytics
             totalDownloads={totalDownloadsCount}
@@ -253,7 +270,7 @@ export function AdminDashboard({
           />
         )}
 
-        {/* 6. WEBSITE SETTINGS */}
+        {/* 7. WEBSITE SETTINGS */}
         {active === 'Website settings' && (
           <AdminWebsiteSettings
             settings={siteSettings}

@@ -1,3 +1,11 @@
+export interface FeatureItem {
+  id: string
+  icon: string
+  title: string
+  text: string
+  image: string
+}
+
 export interface NewsItem {
   id: string
   date: string

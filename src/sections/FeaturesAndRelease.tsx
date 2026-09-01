@@ -1,10 +1,15 @@
 import AdBanner from '../AdBanner'
-import { INITIAL_FEATURES } from '../data'
-import type { ApkVersion, SiteSettings } from '../types'
+import type { ApkVersion, FeatureItem, SiteSettings } from '../types'
 
 const AD_SLOT_FEATURES = '1647148762'
 
-export function FeaturesSection({ onOpenAbout }: { onOpenAbout: () => void }) {
+export function FeaturesSection({
+  features,
+  onOpenAbout,
+}: {
+  features: FeatureItem[]
+  onOpenAbout: () => void
+}) {
   return (
     <>
       <section className="section features-section" id="about">
@@ -14,8 +19,8 @@ export function FeaturesSection({ onOpenAbout }: { onOpenAbout: () => void }) {
           <p>Thoughtfully designed to keep your everyday financial life and digital assets moving in the right direction.</p>
         </div>
         <div className="feature-grid">
-          {INITIAL_FEATURES.map((feature, index) => (
-            <article className="feature-card" key={feature.title}>
+          {features.map((feature, index) => (
+            <article className="feature-card" key={feature.id || feature.title}>
               <div className="feature-img-wrap">
                 <img
                   src={feature.image}

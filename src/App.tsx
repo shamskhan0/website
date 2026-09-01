@@ -16,12 +16,21 @@ import { TermsOfServiceModal } from './modals'
 import { AdminLogin, AdminDashboard } from './admin/AdminPanel'
 import type { AdminUser } from './admin/auth'
 
-import type { NewsItem, ApkVersion, SiteSettings } from './types'
-import { INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
+import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
+import { INITIAL_FEATURES, INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
 import { loadPersisted, usePersistedState } from './persistence'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
+const isFeatureList = (v: unknown): v is FeatureItem[] =>
+  Array.isArray(v) && v.every((f) =>
+    f !== null && typeof f === 'object' &&
+    typeof (f as FeatureItem).id === 'string' &&
+    typeof (f as FeatureItem).title === 'string' &&
+    typeof (f as FeatureItem).text === 'string' &&
+    typeof (f as FeatureItem).image === 'string',
+  )
+
 const isNewsList = (v: unknown): v is NewsItem[] =>
   Array.isArray(v) && v.every((n) =>
     n !== null && typeof n === 'object' &&
@@ -60,6 +69,8 @@ function App() {
 
   // Dynamic Data States saved in localStorage (validated + safe fallback).
   // usePersistedState writes through to localStorage on every update.
+  const [featuresList, setFeaturesList] = usePersistedState('rd_features_data_v1', INITIAL_FEATURES, isFeatureList)
+
   const [newsList, setNewsList] = usePersistedState('rd_news_data_v3', INITIAL_NEWS, isNewsList)
 
   const [apkVersions, setApkVersions] = usePersistedState('rd_apk_versions', INITIAL_APK_VERSIONS, isApkVersions)
@@ -101,6 +112,8 @@ function App() {
         onExit={handleLogout}
         active={activeAdmin}
         setActive={setActiveAdmin}
+        featuresList={featuresList}
+        setFeaturesList={setFeaturesList}
         newsList={newsList}
         setNewsList={setNewsList}
         apkVersions={apkVersions}
@@ -120,7 +133,7 @@ function App() {
       <main id="top">
         <HeroSection siteSettings={siteSettings} liveApk={liveApk} />
         <TrustStrip />
-        <FeaturesSection onOpenAbout={() => setActiveModal('about')} />
+        <FeaturesSection features={featuresList} onOpenAbout={() => setActiveModal('about')} />
         <AppReleaseSection liveApk={liveApk} siteSettings={siteSettings} />
         <AppScreenshotsSection />
         <NewsSection newsList={newsList} onSelectArticle={setSelectedArticle} />

@@ -1,15 +1,25 @@
 import { useState } from 'react'
-import type { NewsItem } from '../../types'
+import type { FeatureItem, NewsItem } from '../../types'
 
 export function AdminNewsManagement({
+  featuresList,
+  setFeaturesList,
   newsList,
   setNewsList,
   showToast,
 }: {
+  featuresList: FeatureItem[]
+  setFeaturesList: (items: FeatureItem[]) => void
   newsList: NewsItem[]
   setNewsList: (items: NewsItem[]) => void
   showToast: (msg: string) => void
 }) {
+  const [featureTitle, setFeatureTitle] = useState('')
+  const [featureText, setFeatureText] = useState('')
+  const [featureIcon, setFeatureIcon] = useState('✦')
+  const [featureImage, setFeatureImage] = useState('/features/fast-reliable.jpg')
+  const [editingFeatureId, setEditingFeatureId] = useState<string | null>(null)
+
   const [title, setTitle] = useState('')
   const [tag, setTag] = useState('PRODUCT UPDATE')
   const [color, setColor] = useState('violet')
@@ -19,6 +29,7 @@ export function AdminNewsManagement({
   const [imageUrl, setImageUrl] = useState(
     'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop'
   )
+  const [editingNewsId, setEditingNewsId] = useState<string | null>(null)
 
   const PRESET_IMAGES = [
     { label: 'Cyber Tech', url: '/news/app-release-v2.jpg' },
@@ -27,10 +38,57 @@ export function AdminNewsManagement({
     { label: 'AI Wealth Hero', url: '/news/featured-ai-wealth.jpg' },
   ]
 
+  const resetFeatureForm = () => {
+    setEditingFeatureId(null)
+    setFeatureTitle('')
+    setFeatureText('')
+    setFeatureIcon('✦')
+    setFeatureImage('/features/fast-reliable.jpg')
+  }
+
+  const handleAddFeature = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const nextItem: FeatureItem = {
+      id: editingFeatureId || `feature-${Date.now()}`,
+      title: featureTitle.trim(),
+      text: featureText.trim(),
+      icon: featureIcon || '✦',
+      image: featureImage.trim() || '/features/fast-reliable.jpg',
+    }
+
+    if (!nextItem.title || !nextItem.text) return
+
+    const updated = editingFeatureId
+      ? featuresList.map((item) => item.id === editingFeatureId ? nextItem : item)
+      : [nextItem, ...featuresList]
+
+    setFeaturesList(updated)
+    resetFeatureForm()
+    showToast(editingFeatureId ? 'Feature card updated and live on website!' : 'Feature card added and live on website!')
+  }
+
+  const startEditingFeature = (item: FeatureItem) => {
+    setEditingFeatureId(item.id)
+    setFeatureTitle(item.title)
+    setFeatureText(item.text)
+    setFeatureIcon(item.icon || '✦')
+    setFeatureImage(item.image || '/features/fast-reliable.jpg')
+  }
+
+  const handleDeleteFeature = (id: string) => {
+    if (confirm('Delete this feature card from the public section?')) {
+      setFeaturesList(featuresList.filter((item) => item.id !== id))
+      if (editingFeatureId === id) resetFeatureForm()
+      showToast('Feature card removed from public website.')
+    }
+  }
+
   const handleAddNews = (e: React.FormEvent) => {
     e.preventDefault()
-    const newItem: NewsItem = {
-      id: `news-${Date.now()}`,
+
+    const nextItem: NewsItem = {
+      id: editingNewsId || `news-${Date.now()}`,
       title,
       tag,
       color,
@@ -44,15 +102,33 @@ export function AdminNewsManagement({
     }
 
     let updatedList = newsList
-    if (isFeatured) {
-      updatedList = updatedList.map((n) => ({ ...n, featured: false }))
+    if (editingNewsId) {
+      updatedList = newsList.map((n) => n.id === editingNewsId ? { ...n, ...nextItem } : n)
+    } else {
+      if (isFeatured) {
+        updatedList = updatedList.map((n) => ({ ...n, featured: false }))
+      }
+      updatedList = [nextItem, ...updatedList]
     }
 
-    setNewsList([newItem, ...updatedList])
+    setNewsList(updatedList)
     setTitle('')
     setText('')
+    setDate('27 AUG 2026')
     setIsFeatured(false)
-    showToast('New article published and live on website!')
+    setEditingNewsId(null)
+    showToast(editingNewsId ? 'News card updated and live on website!' : 'New article published and live on website!')
+  }
+
+  const startEditingNews = (item: NewsItem) => {
+    setEditingNewsId(item.id)
+    setTitle(item.title)
+    setTag(item.tag || 'PRODUCT UPDATE')
+    setColor(item.color || 'violet')
+    setText(item.text)
+    setDate(item.date || '27 AUG 2026')
+    setImageUrl(item.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop')
+    setIsFeatured(Boolean(item.featured))
   }
 
   const setAsFeatured = (id: string) => {
@@ -67,17 +143,135 @@ export function AdminNewsManagement({
   const handleDelete = (id: string) => {
     if (confirm('Delete this article from public news?')) {
       setNewsList(newsList.filter((n) => n.id !== id))
+      if (editingNewsId === id) {
+        setEditingNewsId(null)
+        setTitle('')
+        setText('')
+        setDate('27 AUG 2026')
+        setImageUrl('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop')
+        setIsFeatured(false)
+      }
       showToast('Article removed from public feed.')
     }
   }
 
+  const resetNewsForm = () => {
+    setEditingNewsId(null)
+    setTitle('')
+    setTag('PRODUCT UPDATE')
+    setColor('violet')
+    setText('')
+    setDate('27 AUG 2026')
+    setImageUrl('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop')
+    setIsFeatured(false)
+  }
+
   return (
     <div>
-      {/* Create News Form */}
       <div className="admin-card">
         <div className="admin-card-header">
           <div>
-            <h3>Publish Official News & Story</h3>
+            <h3>{editingFeatureId ? 'Edit Feature Card' : 'Create Feature Card'}</h3>
+            <p>Update the title, description, icon and image used in the public feature section.</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleAddFeature}>
+          <div className="admin-form-grid">
+            <div className="admin-form-group">
+              <label>Feature Title</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={featureTitle}
+                onChange={(e) => setFeatureTitle(e.target.value)}
+                placeholder="Fast & reliable"
+                required
+              />
+            </div>
+            <div className="admin-form-group">
+              <label>Icon</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={featureIcon}
+                onChange={(e) => setFeatureIcon(e.target.value)}
+                placeholder="✦"
+                maxLength={2}
+              />
+            </div>
+            <div className="admin-form-group full-width">
+              <label>Image URL</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={featureImage}
+                onChange={(e) => setFeatureImage(e.target.value)}
+                placeholder="/features/your-image.jpg"
+              />
+            </div>
+            <div className="admin-form-group full-width">
+              <label>Feature Description</label>
+              <textarea
+                className="admin-textarea"
+                value={featureText}
+                onChange={(e) => setFeatureText(e.target.value)}
+                placeholder="Write a clear short description for this card..."
+                required
+              />
+            </div>
+          </div>
+          <div style={{ marginTop: '18px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button type="submit" className="button button-primary">
+              {editingFeatureId ? 'Update Feature Card' : 'Add Feature Card'} <span>→</span>
+            </button>
+            {editingFeatureId && (
+              <button type="button" className="admin-action-btn" onClick={resetFeatureForm}>
+                Cancel edit
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <div>
+            <h3>Published Feature Cards ({featuresList.length})</h3>
+            <p>Manage the images, titles and descriptions shown in the features section.</p>
+          </div>
+        </div>
+
+        <div className="admin-news-grid">
+          {featuresList.map((item) => (
+            <div className="admin-news-card" key={item.id}>
+              {item.image && (
+                <img src={item.image} alt={item.title} className="admin-news-thumb" />
+              )}
+              <div className="admin-news-info" style={{ flex: 1 }}>
+                <div className="admin-news-meta">
+                  <span className="admin-badge live">{item.icon || '✦'}</span>
+                </div>
+                <h4>{item.title}</h4>
+                <p>{item.text}</p>
+              </div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button className="admin-action-btn" onClick={() => startEditingFeature(item)}>
+                  Edit
+                </button>
+                <button className="admin-action-btn danger" onClick={() => handleDeleteFeature(item.id)}>
+                  Delete ✕
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <div>
+            <h3>{editingNewsId ? 'Edit Story' : 'Publish Official News & Story'}</h3>
             <p>Articles published here appear immediately in the website News section with pictures</p>
           </div>
         </div>
@@ -168,15 +362,19 @@ export function AdminNewsManagement({
               </label>
             </div>
           </div>
-          <div style={{ marginTop: '18px' }}>
+          <div style={{ marginTop: '18px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button type="submit" className="button button-primary">
-              Publish Story with Picture <span>→</span>
+              {editingNewsId ? 'Update Story' : 'Publish Story with Picture'} <span>→</span>
             </button>
+            {editingNewsId && (
+              <button type="button" className="admin-action-btn" onClick={resetNewsForm}>
+                Cancel edit
+              </button>
+            )}
           </div>
         </form>
       </div>
 
-      {/* Published News List */}
       <div className="admin-card">
         <div className="admin-card-header">
           <div>
@@ -189,7 +387,7 @@ export function AdminNewsManagement({
           {newsList.map((item) => (
             <div className="admin-news-card" key={item.id}>
               {item.imageUrl && (
-                <img src={item.imageUrl} alt="" className="admin-news-thumb" />
+                <img src={item.imageUrl} alt={item.title} className="admin-news-thumb" />
               )}
               <div className="admin-news-info" style={{ flex: 1 }}>
                 <div className="admin-news-meta">
@@ -214,6 +412,9 @@ export function AdminNewsManagement({
                     ★ Feature
                   </button>
                 )}
+                <button className="admin-action-btn" onClick={() => startEditingNews(item)}>
+                  Edit
+                </button>
                 <button
                   className="admin-action-btn danger"
                   onClick={() => handleDelete(item.id)}

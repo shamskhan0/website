@@ -1,31 +1,56 @@
-export const INITIAL_FEATURES = [
+import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
+
+export const INITIAL_FEATURES: FeatureItem[] = [
   {
+    id: 'feature-fast-reliable',
     icon: '✦',
     title: 'Fast & reliable',
     text: 'A smooth experience built for everyday digital services and instant AI transactions.',
     image: '/features/fast-reliable.jpg',
   },
   {
+    id: 'feature-secure-by-design',
     icon: '⌁',
     title: 'Secure by design',
     text: 'Thoughtful 256-bit cryptographic protection keeps your digital life in trusted hands.',
     image: '/features/secure-by-design.jpg',
   },
   {
+    id: 'feature-easy-to-use',
     icon: '◌',
     title: 'Easy to use',
     text: 'Clear, friendly tools and real-time dashboards that help you get more done effortlessly.',
     image: '/features/easy-to-use.jpg',
   },
   {
+    id: 'feature-always-improving',
     icon: '↗',
     title: 'Always improving',
     text: 'Regular continuous releases bring useful automated features and machine learning refinements.',
     image: '/features/always-improving.jpg',
   },
+  {
+    id: 'feature-trusted-network',
+    icon: '◎',
+    title: 'Trusted network',
+    text: 'Connect with a secure ecosystem built around transparency, trust and long-term digital confidence.',
+    image: '/features/fast-reliable.jpg',
+  },
+  {
+    id: 'feature-smart-automation',
+    icon: '⟡',
+    title: 'Smart automation',
+    text: 'Automate repetitive tasks and unlock smoother financial workflows with intelligent digital tools.',
+    image: '/features/easy-to-use.jpg',
+  },
+  {
+    id: 'feature-people-first',
+    icon: '◍',
+    title: 'People first',
+    text: 'Built to support real lives with clarity, convenience and a more confident digital experience.',
+    image: '/features/secure-by-design.jpg',
+  },
 ]
-
-import type { NewsItem, ApkVersion, SiteSettings } from './types'
 
 export const INITIAL_NEWS: NewsItem[] = [
   {
