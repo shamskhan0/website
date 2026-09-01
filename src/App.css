@@ -354,6 +354,7 @@ em {
   display: grid;
   place-items: center;
   z-index: 1;
+  width: 100%;
 }
 
 .sun-disc {
@@ -380,8 +381,12 @@ em {
 
 /* Outer shell — no overflow:hidden so side buttons stick out */
 .phone-real {
-  width: 248px;
-  height: 500px;
+  width: min(28vw, 248px);
+  max-width: 248px;
+  height: min(56vw, 500px);
+  max-height: 500px;
+  min-width: 200px;
+  min-height: 400px;
   background: linear-gradient(160deg, #1c2133 0%, #0d1117 100%);
   border: 3px solid rgba(255, 255, 255, 0.16);
   border-radius: 44px;
@@ -395,7 +400,6 @@ em {
   padding: 6px;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
   position: relative;
-  /* NO overflow:hidden here — side buttons must stick out */
 }
 
 .phone-real:hover {
@@ -1885,6 +1889,9 @@ footer {
   .hero-art {
     height: 420px;
     margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .sun-disc {
     width: 290px;
@@ -1898,6 +1905,14 @@ footer {
   }
   .phone-screen {
     padding: 24px 14px;
+  }
+  .phone-real {
+    width: min(72vw, 260px);
+    height: min(144vw, 500px);
+    min-width: 180px;
+    min-height: 340px;
+    margin: 0 auto;
+    transform: rotate(0deg);
   }
   .welcome {
     margin: 20px 0;
@@ -2050,6 +2065,15 @@ footer {
     gap: 12px;
     flex-direction: column;
     margin-top: 30px;
+  }
+  .hero-art {
+    height: 340px;
+  }
+  .phone-real {
+    width: min(78vw, 220px);
+    height: min(155vw, 420px);
+    min-width: 170px;
+    min-height: 320px;
   }
   .feature-grid {
     grid-template-columns: 1fr;
