@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { NewsItem } from './types'
+import { DisclaimerModal } from './pages/DisclaimerPage'
+import { CookiePolicyModal } from './pages/CookiePolicyPage'
 
 export function ArticleReaderModal({
   article,
@@ -271,6 +273,9 @@ export function AboutModal({ onClose }: { onClose: () => void }) {
     </div>
   )
 }
+
+export { DisclaimerModal } from './pages/DisclaimerPage'
+export { CookiePolicyModal } from './pages/CookiePolicyPage'
 
 export function TermsOfServiceModal({ onClose }: { onClose: () => void }) {
   return (

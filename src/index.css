@@ -1,17 +1,22 @@
 :root {
-  --bg-dark: #080c14;
-  --bg-card: rgba(15, 23, 42, 0.75);
-  --bg-card-hover: rgba(26, 38, 66, 0.9);
+  --bg-dark: #050807;
+  --bg-mid: #0b1114;
+  --bg-card: rgba(15, 23, 42, 0.68);
+  --bg-card-hover: rgba(17, 26, 31, 0.9);
   --ink: #f8fafc;
-  --muted: #94a3b8;
+  --muted: #a3b3c6;
   --purple: #8b5cf6;
   --blue: #3b82f6;
-  --cyan: #06b6d4;
-  --emerald: #10b981;
+  --cyan: #5eead4;
+  --emerald: #2dd4bf;
+  --emerald-strong: #10b981;
   --gold: #f59e0b;
-  --line: rgba(255, 255, 255, 0.09);
+  --line: rgba(148, 163, 184, 0.15);
+  --line-strong: rgba(45, 212, 191, 0.3);
   --white: #ffffff;
-  
+  --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 40px rgba(45, 212, 191, 0.18);
+
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   color: var(--ink);
   background-color: var(--bg-dark);
@@ -33,9 +38,25 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background-color: var(--bg-dark);
+  background:
+    radial-gradient(circle at top, rgba(34, 197, 94, 0.14), transparent 28%),
+    radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.1), transparent 22%),
+    linear-gradient(180deg, #050807 0%, #070d0d 40%, #050807 100%);
   color: var(--ink);
   overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+  pointer-events: none;
+  opacity: 0.28;
 }
 
 ::-webkit-scrollbar {

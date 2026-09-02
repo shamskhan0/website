@@ -7,11 +7,19 @@ export function SiteFooter({
   onOpenAbout,
   onOpenHelp,
   onOpenAdmin,
+  siteSettings,
+  onOpenDisclaimer,
+  onOpenCookiePolicy,
 }: {
   onOpenAbout: () => void
   onOpenHelp: () => void
   onOpenAdmin: () => void
+  siteSettings: SiteSettings
+  onOpenDisclaimer?: () => void
+  onOpenCookiePolicy?: () => void
 }) {
+  const logoUrl = siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'
+
   return (
     <>
       {/* ── Ad Banner 3 — Above Footer ── */}
@@ -21,7 +29,7 @@ export function SiteFooter({
         <div className="footer-main">
           <div>
             <a className="brand" href="#top" aria-label="Roshan Digital">
-              <img src="/roshan-digital-logo-transparent.png" alt="Roshan Digital" className="footer-logo-img" />
+              <img src={logoUrl} alt="Roshan Digital" className="footer-logo-img" />
             </a>
             <p>Secure Investments. Daily Profits.<br />Smarter Decisions with AI.</p>
           </div>
@@ -33,13 +41,13 @@ export function SiteFooter({
               <a href="#about" onClick={(e) => { e.preventDefault(); onOpenAbout() }}>About us</a>
             </div>
             <div>
-              <b>Support</b>
-              <a href="#help" onClick={(e) => { e.preventDefault(); onOpenHelp() }}>Help centre</a>
-              <a href="#contact">Contact us</a>
+              <b>Legal</b>
               <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy policy ↗</a>
               <a href="/terms" target="_blank" rel="noopener noreferrer">Terms of service ↗</a>
-              <a href="/#data-safety">Data safety</a>
+              <a href="#disclaimer" onClick={(e) => { e.preventDefault(); onOpenDisclaimer?.() }}>Disclaimer</a>
+              <a href="#cookie" onClick={(e) => { e.preventDefault(); onOpenCookiePolicy?.() }}>Cookie policy</a>
             </div>
+
           </div>
         </div>
         <div className="footer-bottom">

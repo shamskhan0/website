@@ -57,13 +57,15 @@ export function AppReleaseSection({
   liveApk: ApkVersion
   siteSettings: SiteSettings
 }) {
+  const logoUrl = siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'
+
   return (
     <section className="app-section" id="app">
       <div className="app-visual">
         <div className="orbit orbit-one"></div>
         <div className="orbit orbit-two"></div>
         <div className="app-badge">
-          <img src="/roshan-digital-logo-transparent.png" alt="Roshan Digital" className="app-badge-logo" />
+          <img src={logoUrl} alt="Roshan Digital" className="app-badge-logo" />
         </div>
         <div className="version-stamp">LATEST<br /><b>RELEASE</b></div>
       </div>

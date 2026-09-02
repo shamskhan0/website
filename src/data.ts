@@ -155,6 +155,36 @@ export const INITIAL_APK_VERSIONS: ApkVersion[] = [
   },
 ]
 
+export const INITIAL_MANAGED_IMAGES: Record<string, import('./types').ManagedImage> = {
+  hero_mobile_image: {
+    key: 'hero_mobile_image',
+    url: '/app-screenshot.jpg',
+    fileName: 'app-screenshot.jpg',
+    uploadDate: '2026-09-02T00:00:00.000Z',
+    updatedDate: '2026-09-02T00:00:00.000Z',
+    active: true,
+    version: 1,
+  },
+  hero_background: {
+    key: 'hero_background',
+    url: '/features/fast-reliable.jpg',
+    fileName: 'fast-reliable.jpg',
+    uploadDate: '2026-09-02T00:00:00.000Z',
+    updatedDate: '2026-09-02T00:00:00.000Z',
+    active: true,
+    version: 1,
+  },
+  app_logo: {
+    key: 'app_logo',
+    url: '/roshan-digital-logo-transparent.png',
+    fileName: 'roshan-digital-logo-transparent.png',
+    uploadDate: '2026-09-02T00:00:00.000Z',
+    updatedDate: '2026-09-02T00:00:00.000Z',
+    active: true,
+    version: 1,
+  },
+}
+
 export const INITIAL_SITE_SETTINGS: SiteSettings = {
   announcementText: 'Latest update: Roshan Digital App v2.0 is now available',
   announcementActive: true,
@@ -165,4 +195,5 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
   telegramLink: 'https://t.me/roshandigital',
   apkDownloadUrl: '/roshan-digital-v2.0.0.apk',
   maintenanceMode: false,
+  images: INITIAL_MANAGED_IMAGES,
 }

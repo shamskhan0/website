@@ -84,6 +84,24 @@ export function AdminNewsManagement({
     }
   }
 
+  const handleFeatureImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a valid image file.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      setFeatureImage(result)
+      showToast('Feature image uploaded successfully.')
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleAddNews = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -155,6 +173,26 @@ export function AdminNewsManagement({
     }
   }
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload a valid image file.')
+      return
+    }
+
+    setImageUrl(file.name)
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      setImageUrl(result)
+      showToast('Image uploaded successfully.')
+    }
+    reader.readAsDataURL(file)
+  }
+
   const resetNewsForm = () => {
     setEditingNewsId(null)
     setTitle('')
@@ -201,14 +239,46 @@ export function AdminNewsManagement({
               />
             </div>
             <div className="admin-form-group full-width">
-              <label>Image URL</label>
-              <input
-                type="text"
-                className="admin-input"
-                value={featureImage}
-                onChange={(e) => setFeatureImage(e.target.value)}
-                placeholder="/features/your-image.jpg"
-              />
+              <label>Feature Image</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <label className="admin-action-btn" htmlFor="feature-image-upload" style={{ cursor: 'pointer', margin: 0, width: 'fit-content' }}>
+                  Upload Picture
+                </label>
+                <input
+                  id="feature-image-upload"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFeatureImageUpload}
+                  aria-label="Upload feature image"
+                  style={{
+                    position: 'absolute',
+                    width: '1px',
+                    height: '1px',
+                    padding: 0,
+                    margin: '-1px',
+                    overflow: 'hidden',
+                    clip: 'rect(0, 0, 0, 0)',
+                    whiteSpace: 'nowrap',
+                    border: 0,
+                    opacity: 0,
+                  }}
+                />
+                {featureImage && (
+                  <img
+                    src={featureImage}
+                    alt="Feature preview"
+                    style={{
+                      width: '100%',
+                      maxHeight: '180px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(148, 163, 184, 0.2)',
+                      background: '#0b1220',
+                    }}
+                  />
+                )}
+              </div>
             </div>
             <div className="admin-form-group full-width">
               <label>Feature Description</label>
@@ -319,14 +389,46 @@ export function AdminNewsManagement({
               />
             </div>
             <div className="admin-form-group">
-              <label>Cover Picture URL</label>
-              <input
-                type="text"
-                className="admin-input"
-                placeholder="https://..."
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
+              <label>Cover Picture</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label className="admin-action-btn" htmlFor="news-cover-upload" style={{ cursor: 'pointer', margin: 0, width: 'fit-content' }}>
+                    Upload Image
+                  </label>
+                  <input
+                    id="news-cover-upload"
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(148, 163, 184, 0.25)',
+                      background: 'rgba(15, 23, 42, 0.8)',
+                      color: '#fff',
+                      fontSize: '12px',
+                    }}
+                  />
+                </div>
+
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt="Selected cover preview"
+                    style={{
+                      width: '100%',
+                      maxHeight: '170px',
+                      objectFit: 'cover',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(148, 163, 184, 0.2)',
+                      background: '#0b1220',
+                    }}
+                  />
+                )}
+
+              </div>
               <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
                 {PRESET_IMAGES.map((p) => (
                   <button

@@ -1,18 +1,29 @@
-import type { SiteSettings, ApkVersion } from '../types'
+import type { SiteSettings, ApkVersion, ManagedImage } from '../types'
+
+const getManagedImageUrl = (image?: ManagedImage) => {
+  if (!image?.url) return '/app-screenshot.jpg'
+
+  const separator = image.url.includes('?') ? '&' : '?'
+  return `${image.url}${separator}v=${image.version ?? 1}`
+}
 
 export function SiteHeader({
   menuOpen,
   setMenuOpen,
   onOpenAbout,
+  siteSettings,
 }: {
   menuOpen: boolean
   setMenuOpen: (open: boolean) => void
   onOpenAbout: () => void
+  siteSettings: SiteSettings
 }) {
+  const logoUrl = siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'
+
   return (
     <header className="site-header">
       <a className="brand" href="#top" aria-label="Roshan Digital home">
-        <img src="/roshan-digital-logo-transparent.png" alt="Roshan Digital" className="brand-logo-img" />
+        <img src={logoUrl} alt="Roshan Digital" className="brand-logo-img" />
       </a>
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">
         {menuOpen ? '×' : '☰'}
@@ -45,9 +56,12 @@ export function HeroSection({
   siteSettings: SiteSettings
   liveApk: ApkVersion
 }) {
+  const heroImage = getManagedImageUrl(siteSettings.images?.hero_mobile_image)
+
   return (
     <section className="hero-section">
       <div className="hero-copy reveal">
+        <div className="hero-badge">THE NEXT GENERATION OF DIGITAL FINANCE</div>
         <p className="eyebrow">DIGITAL, MADE HUMAN <span></span></p>
         <h1>{siteSettings.heroTitle}</h1>
         <p className="hero-text">{siteSettings.heroSubtitle}</p>
@@ -61,49 +75,31 @@ export function HeroSection({
         </div>
       </div>
       <div className="hero-art reveal-delay">
+        <div className="glass-orbit orbit-one" aria-hidden="true"></div>
+        <div className="glass-orbit orbit-two" aria-hidden="true"></div>
+        <div className="glass-orbit orbit-three" aria-hidden="true"></div>
         <div className="sun-disc"></div>
-
-        {/* ── Real App Phone Mockup ── */}
-        <div className="phone phone-real">
-          {/* Phone notch / camera */}
-          <div className="phone-notch">
-            <div className="phone-notch-camera"></div>
-          </div>
-          {/* Side buttons */}
-          <div className="phone-btn phone-btn-vol-up"></div>
-          <div className="phone-btn phone-btn-vol-down"></div>
-          <div className="phone-btn phone-btn-power"></div>
-          {/* Real app screenshot fills the screen */}
-          <div className="phone-screen phone-screen-real">
+        <div className="floating-chip chip-left">
+          <span className="chip-dot"></span>
+          <b>+18.4%</b>
+          <small>Monthly growth</small>
+        </div>
+        <div className="floating-chip chip-right">
+          <span className="chip-line"></span>
+          <b>AI Secure</b>
+          <small>Protected access</small>
+        </div>
+        <div className="device-shell">
+          <div className="phone-frame" aria-label="Roshan Digital dashboard screenshot">
+            <div className="phone-notch" aria-hidden="true"></div>
             <img
-              src="/app-screenshot.jpg"
-              alt="Roshan Digital App — Home Screen"
-              className="phone-screenshot-img"
+              src={heroImage}
+              alt="Roshan Digital dashboard screen"
+              className="phone-screen-image"
               draggable={false}
             />
           </div>
-          {/* Home indicator bar */}
-          <div className="phone-home-bar"></div>
-        </div>
-
-        {/* Floating stat badges around the phone */}
-        <div className="phone-badge phone-badge-left">
-          <span className="phone-badge-icon">📈</span>
-          <div>
-            <b>+18.4%</b>
-            <small>Monthly Return</small>
-          </div>
-        </div>
-        <div className="phone-badge phone-badge-right">
-          <span className="phone-badge-icon">🔒</span>
-          <div>
-            <b>256-bit</b>
-            <small>AES Encrypted</small>
-          </div>
-        </div>
-        <div className="phone-badge phone-badge-bottom">
-          <span style={{ color: 'var(--emerald)', fontWeight: 800 }}>✦</span>
-          <small>AI Insights Active</small>
+          <div className="phone-stand" aria-hidden="true"></div>
         </div>
       </div>
     </section>

@@ -35,6 +35,18 @@ export interface ApkVersion {
   downloadUrl: string
 }
 
+export interface ManagedImage {
+  key: string
+  url: string
+  fileName: string
+  uploadDate: string
+  updatedDate: string
+  active: boolean
+  version: number
+}
+
+export type ManagedImageMap = Record<string, ManagedImage>
+
 export interface SiteSettings {
   announcementText: string
   announcementActive: boolean
@@ -44,4 +56,5 @@ export interface SiteSettings {
   telegramLink: string
   apkDownloadUrl: string
   maintenanceMode: boolean
+  images: ManagedImageMap
 }

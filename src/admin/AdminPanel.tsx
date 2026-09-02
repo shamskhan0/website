@@ -6,14 +6,16 @@ import { AdminVersionHistory } from './tabs/AdminVersionHistory'
 import { AdminNewsManagement } from './tabs/AdminNewsManagement'
 import { AdminDownloadsAnalytics } from './tabs/AdminDownloadsAnalytics'
 import { AdminWebsiteSettings } from './tabs/AdminWebsiteSettings'
+import { MediaLibrary } from './tabs/MediaLibrary'
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from '../types'
 
-export function AdminLogin({ onLogin, onExit }: { onLogin: (user: AdminUser) => void; onExit: () => void }) {
+export function AdminLogin({ onLogin, onExit, brandLogoUrl }: { onLogin: (user: AdminUser) => void; onExit: () => void; brandLogoUrl?: string }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const logoSrc = brandLogoUrl || '/roshan-digital-logo-transparent.png'
 
   const [isChecking, setIsChecking] = useState(false)
 
@@ -44,7 +46,7 @@ export function AdminLogin({ onLogin, onExit }: { onLogin: (user: AdminUser) => 
       <div className="login-panel">
         <button className="login-close" onClick={onExit} aria-label="Return to website">×</button>
         <div className="login-brand">
-          <img src="/roshan-digital-logo-transparent.png" alt="Roshan Digital" className="login-logo-img" />
+          <img src={logoSrc} alt="Roshan Digital" className="login-logo-img" />
         </div>
         <p className="eyebrow">PRIVATE WORKSPACE</p>
         <h1>Welcome back.</h1>
@@ -108,7 +110,7 @@ export function AdminLogin({ onLogin, onExit }: { onLogin: (user: AdminUser) => 
       </div>
       <div className="login-art">
         <div>
-          <span>RD</span>
+          <img src={logoSrc} alt="Roshan Digital" className="login-art-logo" />
           <p>Secure operations.<br /><em>Clear direction.</em></p>
         </div>
       </div>
@@ -143,7 +145,7 @@ export function AdminDashboard({
   siteSettings: SiteSettings
   setSiteSettings: (settings: SiteSettings) => void
 }) {
-  const menu = ['Dashboard', 'Feature management', 'APK management', 'Version history', 'News management', 'Downloads', 'Website settings']
+  const menu = ['Dashboard', 'Feature management', 'APK management', 'Version history', 'News management', 'Downloads', 'Website settings', 'Media library']
   const displayName = user?.name ?? 'Administrator'
   const displayRole = user?.role ?? 'Administrator'
   const displayAvatar = user?.avatar ?? '—'
@@ -173,13 +175,13 @@ export function AdminDashboard({
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <a className="brand" href="#admin">
-          <img src="/roshan-digital-logo-transparent.png" alt="Roshan Digital" className="admin-logo-img" />
+          <img src={siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'} alt="Roshan Digital" className="admin-logo-img" />
         </a>
         <p className="admin-label">WORKSPACE</p>
         <div className="admin-menu">
           {menu.map((item, index) => (
             <button className={active === item ? 'active' : ''} key={item} onClick={() => setActive(item)}>
-              <span>{['▦', '✦', '↥', '◷', '▤', '◒', '⚙'][index]}</span>
+              <span>{['▦', '✦', '↥', '◷', '▤', '◒', '⚙', '▣'][index]}</span>
               {item}
             </button>
           ))}
@@ -277,6 +279,17 @@ export function AdminDashboard({
             onSave={(newSettings) => {
               setSiteSettings(newSettings)
               showToast('Website settings successfully saved and applied live!')
+            }}
+          />
+        )}
+
+        {/* 8. MEDIA LIBRARY */}
+        {active === 'Media library' && (
+          <MediaLibrary
+            settings={siteSettings}
+            onSave={(newSettings) => {
+              setSiteSettings(newSettings)
+              showToast('Media library saved and applied live!')
             }}
           />
         )}
