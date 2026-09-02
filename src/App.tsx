@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import './brand.css'
 import './hero-theme.css'
@@ -21,7 +21,7 @@ import type { AdminUser } from './admin/auth'
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
 import { INITIAL_FEATURES, INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
 import { loadPersisted, usePersistedState } from './persistence'
-import { cloudSyncEnabled, fetchCloudSettings, onSettingsChanged } from './cloudSync'
+import { cloudSyncEnabled, fetchCloudSettings, fetchCloudData, pushCloudData, onSettingsChanged } from './cloudSync'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
@@ -307,6 +307,17 @@ function App() {
           setSiteSettings(remote)
         }
       })
+
+      // Features, news aur APK versions bhi cloud se load karo
+      fetchCloudData<FeatureItem[]>('features').then((remote) => {
+        if (!cancelled && remote && isFeatureList(remote)) setFeaturesList(remote)
+      })
+      fetchCloudData<NewsItem[]>('news').then((remote) => {
+        if (!cancelled && remote && isNewsList(remote)) setNewsList(remote)
+      })
+      fetchCloudData<ApkVersion[]>('apk_versions').then((remote) => {
+        if (!cancelled && remote && isApkVersions(remote)) setApkVersions(remote)
+      })
     }
 
     // Admin panel doosri tab mein save kare to live site instantly update ho
@@ -328,6 +339,36 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // ---- Features/news/APK changes ko cloud par push karo (admin panel se) ----
+  // Pehla render skip hota hai taake init data dobara upload na ho.
+  const featuresSynced = useRef(false)
+  const newsSynced = useRef(false)
+  const apkSynced = useRef(false)
+  useEffect(() => {
+    if (!cloudSyncEnabled) return
+    if (!featuresSynced.current) {
+      featuresSynced.current = true
+      return
+    }
+    void pushCloudData('features', featuresList)
+  }, [featuresList])
+  useEffect(() => {
+    if (!cloudSyncEnabled) return
+    if (!newsSynced.current) {
+      newsSynced.current = true
+      return
+    }
+    void pushCloudData('news', newsList)
+  }, [newsList])
+  useEffect(() => {
+    if (!cloudSyncEnabled) return
+    if (!apkSynced.current) {
+      apkSynced.current = true
+      return
+    }
+    void pushCloudData('apk_versions', apkVersions)
+  }, [apkVersions])
 
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(
     () => loadPersisted<AdminUser | null>('rd_admin_session', null, isAdminUser),

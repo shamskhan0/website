@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
+import { uploadImage } from '../../supabase'
 
 const MEDIA_LIBRARY_DEFS = [
   {
@@ -151,7 +152,7 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
     })
   }, [categoryFilter, entries, query, sortMode])
 
-  const handleImageUpload = (key: string, file: File) => {
+  const handleImageUpload = async (key: string, file: File) => {
     if (!file.type.startsWith('image/')) {
       setStatusMessage('Invalid file type. Upload a JPG, PNG, WEBP, or SVG image.')
       return
@@ -163,10 +164,9 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const nextUrl = typeof reader.result === 'string' ? reader.result : ''
-      if (!nextUrl) {
+    try {
+      const uploadedUrl = await uploadImage(file, 'media-library')
+      if (!uploadedUrl) {
         setStatusMessage('Upload failed. Please try another image file.')
         return
       }
@@ -175,7 +175,7 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
       const nextImage: ManagedImage = {
         ...(current ?? createManagedImage(key, '', file.name)),
         key,
-        url: nextUrl,
+        url: uploadedUrl,
         fileName: file.name,
         uploadDate: current?.uploadDate ?? new Date().toISOString(),
         updatedDate: new Date().toISOString(),
@@ -192,8 +192,9 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
       }))
 
       setStatusMessage(`${key.replace(/_/g, ' ')} uploaded successfully.`)
+    } catch {
+      setStatusMessage('Upload failed. Please check your connection and try again.')
     }
-    reader.readAsDataURL(file)
   }
 
   const handleImageDelete = (key: string) => {

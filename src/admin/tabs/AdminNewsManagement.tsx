@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FeatureItem, NewsItem } from '../../types'
+import { uploadImage } from '../../supabase'
 
 export function AdminNewsManagement({
   featuresList,
@@ -84,7 +85,7 @@ export function AdminNewsManagement({
     }
   }
 
-  const handleFeatureImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFeatureImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -93,13 +94,17 @@ export function AdminNewsManagement({
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : ''
-      setFeatureImage(result)
+    try {
+      const uploadedUrl = await uploadImage(file, 'features')
+      if (!uploadedUrl) {
+        showToast('Upload failed. Please try a different image.')
+        return
+      }
+      setFeatureImage(uploadedUrl)
       showToast('Feature image uploaded successfully.')
+    } catch {
+      showToast('Upload failed. Please check your connection.')
     }
-    reader.readAsDataURL(file)
   }
 
   const handleAddNews = (e: React.FormEvent) => {
@@ -173,7 +178,7 @@ export function AdminNewsManagement({
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
@@ -182,15 +187,17 @@ export function AdminNewsManagement({
       return
     }
 
-    setImageUrl(file.name)
-
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : ''
-      setImageUrl(result)
+    try {
+      const uploadedUrl = await uploadImage(file, 'news')
+      if (!uploadedUrl) {
+        showToast('Upload failed. Please try a different image.')
+        return
+      }
+      setImageUrl(uploadedUrl)
       showToast('Image uploaded successfully.')
+    } catch {
+      showToast('Upload failed. Please check your connection.')
     }
-    reader.readAsDataURL(file)
   }
 
   const resetNewsForm = () => {

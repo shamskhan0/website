@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
+import { uploadImage } from '../../supabase'
 
 const IMAGE_CONFIG = [
   {
@@ -57,7 +58,7 @@ export function AdminWebsiteSettings({
     setStatusMessage('Website settings saved and image assignments updated.')
   }
 
-  const handleImageUpload = (key: string, file: File) => {
+  const handleImageUpload = async (key: string, file: File) => {
     if (!file.type.startsWith('image/')) {
       setStatusMessage('Invalid file type. Please upload a JPG, PNG, GIF, or WebP image.')
       return
@@ -68,11 +69,10 @@ export function AdminWebsiteSettings({
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const nextUrl = typeof reader.result === 'string' ? reader.result : ''
+    try {
+      const uploadedUrl = await uploadImage(file, 'website-settings')
 
-      if (!nextUrl) {
+      if (!uploadedUrl) {
         setStatusMessage('Upload failed. Please try a different image file.')
         return
       }
@@ -81,7 +81,7 @@ export function AdminWebsiteSettings({
       const nextImage: ManagedImage = {
         ...(current ?? createManagedImage(key, '', file.name)),
         key,
-        url: nextUrl,
+        url: uploadedUrl,
         fileName: file.name,
         uploadDate: current?.uploadDate ?? new Date().toISOString(),
         updatedDate: new Date().toISOString(),
@@ -97,8 +97,9 @@ export function AdminWebsiteSettings({
         },
       }))
       setStatusMessage(`${key.replace(/_/g, ' ')} updated successfully.`)
+    } catch {
+      setStatusMessage('Upload failed. Please check your connection and try again.')
     }
-    reader.readAsDataURL(file)
   }
 
   const handleImageDelete = (key: string) => {

@@ -1,38 +1,44 @@
 /**
  * Cloud Sync for Site Settings (images, announcement, hero text, etc.)
  *
- * Uses https://jsonblob.com — a free, zero-setup JSON storage API.
- * The blob ID is stored in .env (VITE_CLOUD_BLOB_ID) and baked into the
- * build. Every visitor fetches settings from the cloud, so when the admin
- * saves, ALL users see the change after a page refresh (and the admin
- * panel broadcasts instantly to open tabs via a storage event).
+ * Backed by Supabase — a single row in the `site_settings` table
+ * (id = 1, `data` jsonb column) holds the whole settings object.
  *
- * To set up once:
- *   1. POST {} to https://jsonblob.com/api/jsonBlob
- *      → response header "Location" contains the new blob URL.
- *      The last URL segment is the blob id, e.g. 1234567890123456789
- *   2. Put that id in .env:  VITE_CLOUD_BLOB_ID=1234567890123456789
+ * One-time setup in the Supabase SQL Editor (Dashboard → SQL Editor):
  *
- * Base64 data-URL images are stored inline in the blob (this is how the
- * admin uploads work today). jsonblob accepts large bodies (~1MB+), so
- * keep each image under ~700KB for reliable sync. If no blob id is
- * configured, everything falls back to localStorage-only mode (old
- * behaviour) and nothing breaks.
+ *   create table if not exists site_settings (
+ *     id int primary key default 1,
+ *     data jsonb not null default '{}'::jsonb,
+ *     updated_at timestamptz not null default now()
+ *   );
+ *   alter table site_settings enable row level security;
+ *   create policy "read settings" on site_settings for select using (true);
+ *   create policy "insert settings" on site_settings for insert with check (true);
+ *   create policy "update settings" on site_settings for update using (true) with check (true);
+ *   insert into site_settings (id) values (1) on conflict do nothing;
+ *
+ * If Supabase env vars are not configured, everything falls back to
+ * localStorage-only mode (old behaviour) and nothing breaks.
  */
 
-const BLOB_ID = import.meta.env.VITE_CLOUD_BLOB_ID as string | undefined;
-const API = BLOB_ID ? `https://jsonblob.com/api/jsonBlob/${BLOB_ID}` : "";
+import { supabase, supabaseEnabled } from './supabase'
 
-export const cloudSyncEnabled = Boolean(BLOB_ID);
+export const cloudSyncEnabled = supabaseEnabled;
 
 /** Read settings from the cloud. Returns null on any failure. */
 export async function fetchCloudSettings<T>(): Promise<T | null> {
-  if (!API) return null;
+  if (!supabase) return null;
   try {
-    const res = await fetch(API, { headers: { Accept: "application/json" } });
-    if (!res.ok) return null;
-    const data = (await res.json()) as T | null;
-    return data;
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('data')
+      .eq('id', 1)
+      .maybeSingle();
+    if (error) {
+      console.error('fetchCloudSettings:', error.message);
+      return null;
+    }
+    return (data?.data as T) ?? null;
   } catch {
     return null;
   }
@@ -40,17 +46,69 @@ export async function fetchCloudSettings<T>(): Promise<T | null> {
 
 /** Write settings to the cloud. Returns true on success. */
 export async function pushCloudSettings(settings: unknown): Promise<boolean> {
-  if (!API) return false;
+  if (!supabase) return false;
   try {
-    const res = await fetch(API, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(settings),
+    const { error } = await supabase.from('site_settings').upsert({
+      id: 1,
+      data: settings,
+      updated_at: new Date().toISOString(),
     });
-    return res.ok;
+    if (error) {
+      console.error('pushCloudSettings:', error.message);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generic key/value cloud storage (features, news, APK versions, etc.).
+ * Stored as one row per key in the `cloud_data` table:
+ *
+ *   create table if not exists cloud_data (
+ *     key text primary key,
+ *     value jsonb not null,
+ *     updated_at timestamptz not null default now()
+ *   );
+ *   alter table cloud_data enable row level security;
+ *   create policy "read cloud_data" on cloud_data for select using (true);
+ *   create policy "insert cloud_data" on cloud_data for insert with check (true);
+ *   create policy "update cloud_data" on cloud_data for update using (true) with check (true);
+ */
+
+export async function fetchCloudData<T>(key: string): Promise<T | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('cloud_data')
+      .select('value')
+      .eq('key', key)
+      .maybeSingle();
+    if (error) {
+      console.error(`fetchCloudData(${key}):`, error.message);
+      return null;
+    }
+    return (data?.value as T) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function pushCloudData(key: string, value: unknown): Promise<boolean> {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase.from('cloud_data').upsert({
+      key,
+      value,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) {
+      console.error(`pushCloudData(${key}):`, error.message);
+      return false;
+    }
+    return true;
   } catch {
     return false;
   }
