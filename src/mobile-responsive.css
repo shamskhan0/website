@@ -132,17 +132,45 @@ body {
     transform: none;
     animation: floatPhoneFlat 6s ease-in-out infinite;
   }
+  /* Sab kuch web jaisa — sirf scale chota, kuch bhi hidden nahi */
   .phone-stand {
-    display: none;
+    display: block;
+    width: 170px;
+    height: 44px;
+    bottom: -12px;
   }
-  .hero-float-card,
+  .hero-float-card {
+    display: block;
+    left: 6px;
+    top: 30px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .hero-float-row strong {
+    font-size: 16px;
+  }
+  .hero-float-label {
+    width: 20px;
+    height: 20px;
+    font-size: 8px;
+    border-radius: 6px;
+  }
+  .hero-float-row.muted {
+    font-size: 9px;
+  }
   .hero-graph-card {
-    display: none;
+    display: flex;
+    right: 6px;
+    bottom: 10px;
+    width: 130px;
+    height: 110px;
+    border-radius: 16px;
+    padding: 12px 10px 10px;
   }
   .orbit-one,
   .orbit-two,
   .orbit-three {
-    opacity: 0.45;
+    opacity: 0.7;
   }
   .orbit-one {
     width: 260px;
@@ -150,15 +178,37 @@ body {
     right: 12%;
     top: 30px;
   }
-  .orbit-two,
+  .orbit-two {
+    display: block;
+    width: 320px;
+    height: 320px;
+    right: 6%;
+    top: 6px;
+  }
   .orbit-three {
-    display: none;
+    display: block;
+    width: 360px;
+    height: 360px;
+    right: 2%;
+    top: -14px;
   }
   .sun-disc {
     width: 260px;
     height: 260px;
     right: 13%;
     top: 30px;
+  }
+  .label-one {
+    top: 34px;
+    right: 2%;
+    font-size: 8px;
+    padding: 5px 9px;
+  }
+  .label-two {
+    bottom: 30px;
+    left: 2%;
+    font-size: 8px;
+    padding: 5px 9px;
   }
   .hero-text {
     font-size: 15px;
@@ -371,6 +421,488 @@ body {
     min-height: auto;
   }
   .device-shell {
+    min-height: 300px;
+  }
+  .phone-frame {
+    width: 160px;
+    height: 320px;
+  }
+}
+
+/* ==========================================================================
+   SAME-VIEW MODE — mobile par bhi desktop wala view (sab visible, scaled)
+   ========================================================================== */
+@media (max-width: 600px) {
+  /* Floating chips wapas visible (App.css 900px rule override) */
+  .chip-left,
+  .chip-right {
+    display: flex;
+  }
+  .chip-left {
+    top: 60px;
+    left: 4px;
+  }
+  .chip-right {
+    right: 4px;
+    bottom: 50px;
+  }
+
+  /* Steps grid: web jaisi 3-column rakho, sirf compact */
+  .steps-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    max-width: none;
+    margin-top: 32px;
+  }
+  .steps-grid::before {
     display: none;
+  }
+  .step-card {
+    padding: 16px 10px;
+  }
+  .step-card h3 {
+    font-size: 14px;
+  }
+  .step-card p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Why grid: web jaisi 4-column, compact */
+  .why-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Stats: 4-column web view, compact */
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  /* Trust highlights: 4-col web view compact */
+  .trust-highlights-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Journey: web jaisi row layout, chote nodes */
+  .journey-track {
+    gap: 8px;
+  }
+  .journey-node {
+    min-width: 0;
+    flex: 1;
+    padding: 8px;
+  }
+  .journey-node p,
+  .journey-node b,
+  .journey-node small {
+    font-size: 9.5px;
+  }
+
+  /* Featured article: web jaisa 2-col side-by-side, compact */
+  .featured-article-card {
+    grid-template-columns: 1fr 1.15fr;
+  }
+  .featured-visual {
+    min-height: 200px;
+  }
+  .featured-badge-bar {
+    top: 10px;
+    left: 10px;
+    gap: 6px;
+  }
+  .featured-badge,
+  .featured-read-time {
+    font-size: 8px;
+    padding: 4px 7px;
+  }
+  .featured-content {
+    padding: 16px 12px;
+  }
+  .featured-title {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .featured-text {
+    font-size: 10.5px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .featured-meta {
+    font-size: 9px;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .featured-stat-pill {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+  .featured-stats {
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .featured-actions .text-link {
+    font-size: 11px;
+  }
+
+  /* Contact: web jaisi side-by-side row, compact */
+  .contact-section {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .contact-section .button {
+    width: auto;
+    margin-top: 0;
+    padding: 12px 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .chip-left {
+    top: 40px;
+  }
+  .step-card h3 {
+    font-size: 12px;
+  }
+  .step-card p {
+    font-size: 10px;
+  }
+  .featured-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* ==========================================================================
+   COMPACT LAYER — chote icons & cards on mobile
+   ========================================================================== */
+
+@media (max-width: 600px) {
+  /* Section headings choti */
+  .section-heading h2,
+  .contact-section h2,
+  .news-heading h2 {
+    font-size: clamp(24px, 6.5vw, 32px);
+  }
+
+  /* Icon containers chote */
+  .why-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    border-radius: 11px;
+    margin-bottom: 12px;
+  }
+
+  .step-number {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  .trust-highlight-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Cards compact */
+  .why-card,
+  .step-card,
+  .stats-card {
+    padding: 18px 15px;
+    border-radius: 16px;
+  }
+
+  .why-card h3,
+  .step-card h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+  }
+
+  .why-card p,
+  .step-card p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .stats-card {
+    padding: 16px 14px;
+  }
+
+  .stats-card strong {
+    font-size: 24px;
+    margin-top: 8px;
+  }
+
+  .stats-card span {
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Trust strip items chote */
+  .trust-strip {
+    font-size: 10.5px;
+  }
+
+  .trust-strip div {
+    gap: 8px;
+  }
+
+  .trust-strip i {
+    width: 28px;
+  }
+
+  /* Journey nodes compact */
+  .journey-node {
+    padding: 9px 11px;
+    gap: 9px;
+  }
+
+  .journey-step {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+
+  /* News cards aur choti */
+  .news-card {
+    border-radius: 16px;
+  }
+
+  .news-image {
+    height: 150px;
+  }
+
+  .news-content {
+    padding: 16px 14px;
+  }
+
+  .news-content h3 {
+    font-size: 16px;
+    margin: 8px 0 6px;
+  }
+
+  .news-content p {
+    font-size: 12.5px;
+  }
+
+  .news-content time {
+    font-size: 10px;
+  }
+
+  /* Featured article compact */
+  .featured-visual {
+    min-height: 170px;
+  }
+
+  .featured-content {
+    padding: 20px 16px;
+  }
+
+  .featured-title {
+    font-size: 17px;
+  }
+
+  .featured-text {
+    font-size: 12.5px;
+    margin-bottom: 12px;
+  }
+
+  .featured-badge {
+    font-size: 9px;
+    padding: 5px 9px;
+  }
+
+  .featured-stat-pill {
+    font-size: 10px;
+    padding: 4px 9px;
+  }
+
+  .featured-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Hero badge / eyebrow chote */
+  .hero-badge {
+    font-size: 9px;
+    padding: 7px 12px;
+    letter-spacing: 1.2px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.8px;
+    margin-bottom: 16px;
+  }
+
+  .eyebrow span {
+    width: 22px;
+  }
+
+  /* Buttons thode compact but thumb-friendly */
+  .button {
+    padding: 13px 20px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    gap: 12px;
+  }
+
+  /* Contact section chota */
+  .contact-section {
+    border-radius: 18px;
+  }
+
+  .contact-section h2 {
+    font-size: 26px;
+  }
+
+  /* Header: icons & toggle chote */
+  .menu-toggle {
+    font-size: 17px;
+    padding: 7px 11px;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  /* Mobile nav links compact */
+  .site-header nav {
+    padding: 18px 16px;
+    gap: 14px;
+    font-size: 14px;
+  }
+
+  /* Modal chota & compact */
+  .modal-window {
+    border-radius: 14px;
+  }
+
+  .modal-header {
+    padding: 14px 16px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .modal-title-lockup img {
+    height: 30px;
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    font-size: 17px;
+  }
+
+  /* Admin: cards/icons compact */
+  .stat-grid > div {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+
+  .stat-grid b {
+    font-size: 21px;
+    margin: 8px 0 4px;
+  }
+
+  .stat-grid span,
+  .stat-grid small {
+    font-size: 10px;
+  }
+
+  .panel {
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+
+  .panel h2 {
+    font-size: 17px;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 10px;
+  }
+
+  .admin-menu button {
+    padding: 9px 11px;
+    font-size: 12px;
+  }
+
+  .admin-menu button span {
+    width: 20px;
+    font-size: 14px;
+  }
+
+  .release-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+
+  /* Floating chips chote */
+  .floating-chip {
+    padding: 8px 10px;
+    border-radius: 10px;
+  }
+
+  .floating-chip b {
+    font-size: 12px;
+  }
+
+  .floating-chip small {
+    font-size: 8px;
+  }
+
+  .chip-dot {
+    width: 7px;
+    height: 7px;
+  }
+}
+
+@media (max-width: 380px) {
+  .why-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .why-card,
+  .step-card {
+    padding: 15px 13px;
+  }
+
+  .brand-mark {
+    width: 27px;
+    height: 27px;
+    font-size: 14px;
+  }
+
+  .brand strong {
+    font-size: 14px;
   }
 }
