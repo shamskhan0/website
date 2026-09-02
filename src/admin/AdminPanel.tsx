@@ -8,6 +8,24 @@ import { AdminDownloadsAnalytics } from './tabs/AdminDownloadsAnalytics'
 import { AdminWebsiteSettings } from './tabs/AdminWebsiteSettings'
 import { MediaLibrary } from './tabs/MediaLibrary'
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from '../types'
+import { cloudSyncEnabled, pushCloudSettings } from '../cloudSync'
+
+/**
+ * Save settings locally AND push to the cloud so every visitor of the
+ * website sees the change (not just this browser). Returns a status message.
+ */
+function useCloudSave(setSiteSettings: (s: SiteSettings) => void) {
+  return async (newSettings: SiteSettings, label: string) => {
+    setSiteSettings(newSettings)
+    if (cloudSyncEnabled) {
+      const ok = await pushCloudSettings(newSettings)
+      return ok
+        ? `${label} saved & synced to the live website — sab users ko nazar aayega.`
+        : `${label} saved locally, lekin cloud sync FAIL hui. Internet check karein.`
+    }
+    return `${label} saved locally. (Cloud sync configured nahi hai — VITE_CLOUD_BLOB_ID .env mein set karein taake sab users ko change dikhe.)`
+  }
+}
 
 export function AdminLogin({ onLogin, onExit, brandLogoUrl }: { onLogin: (user: AdminUser) => void; onExit: () => void; brandLogoUrl?: string }) {
   const [email, setEmail] = useState('')
@@ -160,6 +178,8 @@ export function AdminDashboard({
     toastTimerRef.current = setTimeout(() => setToastMsg(''), 4000)
   }
 
+  const saveWithCloud = useCloudSave(setSiteSettings)
+
   // Clear any pending toast timer when the dashboard unmounts (e.g. on logout)
   useEffect(() => {
     return () => {
@@ -277,8 +297,7 @@ export function AdminDashboard({
           <AdminWebsiteSettings
             settings={siteSettings}
             onSave={(newSettings) => {
-              setSiteSettings(newSettings)
-              showToast('Website settings successfully saved and applied live!')
+              void saveWithCloud(newSettings, 'Website settings').then(showToast)
             }}
           />
         )}
@@ -288,8 +307,7 @@ export function AdminDashboard({
           <MediaLibrary
             settings={siteSettings}
             onSave={(newSettings) => {
-              setSiteSettings(newSettings)
-              showToast('Media library saved and applied live!')
+              void saveWithCloud(newSettings, 'Media library').then(showToast)
             }}
           />
         )}

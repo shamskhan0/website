@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import './brand.css'
 import './hero-theme.css'
@@ -21,6 +21,7 @@ import type { AdminUser } from './admin/auth'
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
 import { INITIAL_FEATURES, INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
 import { loadPersisted, usePersistedState } from './persistence'
+import { cloudSyncEnabled, fetchCloudSettings, onSettingsChanged } from './cloudSync'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
@@ -293,6 +294,40 @@ function App() {
   const [apkVersions, setApkVersions] = usePersistedState('rd_apk_versions', INITIAL_APK_VERSIONS, isApkVersions)
 
   const [siteSettings, setSiteSettings] = usePersistedState('rd_site_settings', INITIAL_SITE_SETTINGS, isSiteSettings)
+
+  // ---- Cloud sync: har visitor cloud se latest settings load karta hai ----
+  // Admin save karta hai -> cloud update -> koi bhi user page kholay to naya
+  // content dekhta hai. Sirf admin apne browser mein nahi, POORI website mein.
+  useEffect(() => {
+    let cancelled = false
+
+    if (cloudSyncEnabled) {
+      fetchCloudSettings<SiteSettings>().then((remote) => {
+        if (!cancelled && remote && isSiteSettings(remote)) {
+          setSiteSettings(remote)
+        }
+      })
+    }
+
+    // Admin panel doosri tab mein save kare to live site instantly update ho
+    const off = onSettingsChanged(() => {
+      try {
+        const saved = localStorage.getItem('rd_site_settings')
+        if (saved) {
+          const parsed: unknown = JSON.parse(saved)
+          if (isSiteSettings(parsed)) setSiteSettings(parsed)
+        }
+      } catch {
+        // ignore
+      }
+    })
+
+    return () => {
+      cancelled = true
+      off()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(
     () => loadPersisted<AdminUser | null>('rd_admin_session', null, isAdminUser),
