@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import './brand.css'
+import './mobile-responsive.css'
 import './hero-theme.css'
 import './center-hero.css'
 import './login-theme.css'
