@@ -304,7 +304,6 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
                     id={`${entry.key}-media-upload`}
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
                       if (file) handleImageUpload(entry.key, file)

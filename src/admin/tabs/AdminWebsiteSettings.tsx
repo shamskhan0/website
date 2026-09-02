@@ -241,7 +241,6 @@ export function AdminWebsiteSettings({
                         id={`${imageConfig.key}-upload`}
                         type="file"
                         accept="image/*"
-                        capture="environment"
                         onChange={(e) => {
                           const file = e.target.files?.[0]
                           if (file) handleImageUpload(imageConfig.key, file)

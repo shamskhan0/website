@@ -248,7 +248,6 @@ export function AdminNewsManagement({
                   id="feature-image-upload"
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={handleFeatureImageUpload}
                   aria-label="Upload feature image"
                   style={{
@@ -399,7 +398,6 @@ export function AdminNewsManagement({
                     id="news-cover-upload"
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     onChange={handleImageUpload}
                     style={{
                       width: '100%',
