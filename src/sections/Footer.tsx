@@ -5,7 +5,6 @@ const AD_SLOT_FOOTER = '1647148764'
 
 export function SiteFooter({
   onOpenAbout,
-  onOpenHelp,
   onOpenAdmin,
   siteSettings,
   onOpenDisclaimer,

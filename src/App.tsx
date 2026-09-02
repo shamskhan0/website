@@ -8,16 +8,13 @@ import './pages.css'
 import { AnnouncementBar, HeroSection, SiteHeader } from './sections/HeaderHero'
 import { AppReleaseSection, AppScreenshotsSection, FeaturesSection } from './sections/FeaturesAndRelease'
 import { ContactSection, NewsSection } from './sections/NewsAndContact'
-import { SiteFooter, TrustStrip } from './sections/Footer'
+import { SiteFooter } from './sections/Footer'
 import { ArticleReaderModal } from './modals'
 import { HelpCenterModal } from './modals'
 import { PrivacyPolicyModal } from './modals'
 import { AboutModal } from './modals'
 import { TermsOfServiceModal } from './modals'
-import { DisclaimerModal } from './modals'
-import { CookiePolicyModal } from './modals'
-import { DownloadAppPage } from './pages/DownloadPage'
-import { NotFoundPage } from './pages/ErrorPage'
+import { DisclaimerModal, CookiePolicyModal } from './modals'
 import { AdminLogin, AdminDashboard } from './admin/AdminPanel'
 import type { AdminUser } from './admin/auth'
 
@@ -265,7 +262,7 @@ function FinalDownloadCta({ siteSettings }: { siteSettings: SiteSettings }) {
     <section className="final-cta-section">
       <div className="final-cta-visual" aria-hidden="true">
         <div className="cta-glass-ring"></div>
-        <div className="cta-phone"> 
+        <div className="cta-phone">
           <img src={heroImage} alt="Roshan Digital app" className="cta-phone-image" />
         </div>
       </div>
@@ -285,7 +282,6 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
   const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | 'disclaimer' | 'cookie' | null>(null)
-  const [currentView, setCurrentView] = useState<'home' | 'download' | 'not-found'>('home')
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
   // Dynamic Data States saved in localStorage (validated + safe fallback).

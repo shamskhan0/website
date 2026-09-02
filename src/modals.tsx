@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import type { NewsItem } from './types'
-import { DisclaimerModal } from './pages/DisclaimerPage'
-import { CookiePolicyModal } from './pages/CookiePolicyPage'
 
 export function ArticleReaderModal({
   article,
@@ -112,7 +110,7 @@ export function PrivacyPolicyModal({ onClose }: { onClose: () => void }) {
         <div className="modal-body">
           <p><strong>Effective Date:</strong> August 27, 2026</p>
           <p>At Roshan Digital, your security and privacy are our top priorities. This Privacy Policy explains how we collect, use, protect, and handle your information across all Roshan Digital services and applications.</p>
-          
+
           <h3>1. Information We Collect</h3>
           <p>We collect essential operational information necessary to provide AI-powered portfolio insights and secure digital account services:</p>
           <ul>

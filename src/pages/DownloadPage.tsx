@@ -7,8 +7,6 @@ export function DownloadAppPage({
   liveApk: ApkVersion
   siteSettings: SiteSettings
 }) {
-  const allVersions = [liveApk] // In a real app, you'd pass all versions
-
   return (
     <div className="download-page">
       <section className="download-hero">

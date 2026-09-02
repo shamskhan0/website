@@ -1,18 +1,16 @@
-import type { SiteSettings, ApkVersion } from '../types'
+import type { SiteSettings } from '../types'
 
 export function ErrorPage({
   code = '404',
   title = 'Page Not Found',
   message = 'The page you are looking for does not exist or has been moved.',
   siteSettings,
-  liveApk,
   onNavigateHome,
 }: {
   code?: string
   title?: string
   message?: string
   siteSettings: SiteSettings
-  liveApk: ApkVersion
   onNavigateHome: () => void
 }) {
   return (
@@ -74,11 +72,9 @@ export function ErrorPage({
 
 export function NotFoundPage({
   siteSettings,
-  liveApk,
   onNavigateHome,
 }: {
   siteSettings: SiteSettings
-  liveApk: ApkVersion
   onNavigateHome: () => void
 }) {
   return (
@@ -87,7 +83,6 @@ export function NotFoundPage({
       title="Page Not Found"
       message="We couldn't find the page you were looking for. It may have been moved or removed."
       siteSettings={siteSettings}
-      liveApk={liveApk}
       onNavigateHome={onNavigateHome}
     />
   )
@@ -95,11 +90,9 @@ export function NotFoundPage({
 
 export function ServerErrorPage({
   siteSettings,
-  liveApk,
   onNavigateHome,
 }: {
   siteSettings: SiteSettings
-  liveApk: ApkVersion
   onNavigateHome: () => void
 }) {
   return (
@@ -108,7 +101,6 @@ export function ServerErrorPage({
       title="Server Error"
       message="Something went wrong on our end. We're working to fix it. Please try again later."
       siteSettings={siteSettings}
-      liveApk={liveApk}
       onNavigateHome={onNavigateHome}
     />
   )
@@ -116,10 +108,8 @@ export function ServerErrorPage({
 
 export function MaintenancePage({
   siteSettings,
-  onNavigateHome,
 }: {
   siteSettings: SiteSettings
-  onNavigateHome: () => void
 }) {
   return (
     <div className="maintenance-page-shell">
