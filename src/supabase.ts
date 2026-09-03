@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+const env = import.meta.env as ImportMetaEnv & Record<string, string | undefined>
+const supabaseUrl = env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export const supabaseEnabled = Boolean(supabaseUrl && supabaseAnonKey)
 
@@ -35,7 +36,7 @@ function describeSupabaseError(error: { message?: string } | null | undefined): 
     return 'A file with the same name already exists. Please retry the upload.'
   }
   if (msg.includes('invalid') && msg.includes('jwt')) {
-    return 'Authentication failed — check VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY.'
+    return 'Authentication failed — check the Supabase project URL and publishable key.'
   }
   if (msg.includes('failed to fetch') || msg.includes('network')) {
     return 'Network error — check your internet connection and try again.'
@@ -56,7 +57,7 @@ export async function uploadImage(
   onProgress?: (percent: number) => void,
 ): Promise<{ url: string; path: string } | { error: string }> {
   if (!supabase) {
-    return { error: 'Supabase is not configured (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY missing).' }
+    return { error: 'Supabase is not configured. Add the project URL and publishable key to the app environment.' }
   }
   if (!file.type.startsWith('image/')) {
     return { error: 'Invalid file type. Please upload a JPG, PNG, WebP, GIF or SVG image.' }

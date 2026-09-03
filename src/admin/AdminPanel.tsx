@@ -23,7 +23,7 @@ function useCloudSave(setSiteSettings: (s: SiteSettings) => void) {
         ? `${label} saved & synced to the live website — sab users ko nazar aayega.`
         : `${label} saved locally, lekin cloud sync FAIL hui. Internet check karein.`
     }
-    return `${label} saved locally. (Cloud sync configured nahi hai — VITE_SUPABASE_URL aur VITE_SUPABASE_ANON_KEY .env mein set karein taake sab users ko change dikhe.)`
+    return `${label} saved locally. Supabase cloud sync is not configured, so other visitors will not see this change yet.`
   }
 }
 
