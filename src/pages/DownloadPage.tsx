@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import type { ApkVersion, SiteSettings } from '../types'
+import { downloadApkFile } from '../apkDownload'
 
 export function DownloadAppPage({
   liveApk,
@@ -7,6 +9,11 @@ export function DownloadAppPage({
   liveApk: ApkVersion
   siteSettings: SiteSettings
 }) {
+  const [dlStatus, setDlStatus] = useState('')
+  const handleApkDownload = () => {
+    setDlStatus('APK download ho rahi hai…')
+    void downloadApkFile(liveApk.downloadUrl, setDlStatus)
+  }
   return (
     <div className="download-page">
       <section className="download-hero">
@@ -53,10 +60,17 @@ export function DownloadAppPage({
             <a
               href={liveApk.downloadUrl}
               download
+              onClick={(e) => {
+                e.preventDefault()
+                handleApkDownload()
+              }}
               className="button button-primary download-btn"
             >
               Download APK <span>↓</span>
             </a>
+            {dlStatus && (
+              <small className="download-note" style={{ display: 'block', marginTop: '6px' }}>{dlStatus}</small>
+            )}
             <small className="download-note">Direct download to your device</small>
           </div>
 

@@ -1,5 +1,6 @@
 import AdBanner from '../AdBanner'
 import type { ApkVersion, FeatureItem, SiteSettings } from '../types'
+import { downloadApkFile } from '../apkDownload'
 
 const AD_SLOT_FEATURES = '1647148762'
 
@@ -87,7 +88,15 @@ export function AppReleaseSection({
           </ul>
         </div>
         {/* APK version section se connected: LIVE APK ka real Supabase Storage URL */}
-        <a className="button button-light" href={liveApk.downloadUrl} download>
+        <a
+          className="button button-light"
+          href={liveApk.downloadUrl}
+          download
+          onClick={(e) => {
+            e.preventDefault()
+            void downloadApkFile(liveApk.downloadUrl)
+          }}
+        >
           Download latest APK <span>↓</span>
         </a>
         <small className="android-note">For Android {liveApk.minAndroid} · APK file</small>

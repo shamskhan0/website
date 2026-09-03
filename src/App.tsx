@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { downloadApkFile } from './apkDownload'
 import './App.css'
 import './brand.css'
 import './hero-theme.css'
@@ -272,7 +273,15 @@ function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSetting
         <h2>Experience Roshan Digital</h2>
         <p>Discover a modern digital experience designed around simplicity and convenience.</p>
         <div className="hero-actions">
-          <a className="button button-primary" href={liveApk.downloadUrl} download>Download App <span>↓</span></a>
+          <a
+            className="button button-primary"
+            href={liveApk.downloadUrl}
+            download
+            onClick={(e) => {
+              e.preventDefault()
+              void downloadApkFile(liveApk.downloadUrl)
+            }}
+          >Download App <span>↓</span></a>
         </div>
       </div>
     </section>

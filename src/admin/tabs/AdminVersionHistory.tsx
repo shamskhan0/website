@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ApkVersion } from '../../types'
 import { promoteToLive } from '../apkStatus'
+import { downloadApkFile } from '../../apkDownload'
 
 const STATUS_FILTERS = ['ALL', 'LIVE', 'ARCHIVED', 'BETA'] as const
 type StatusFilter = (typeof STATUS_FILTERS)[number]
@@ -105,7 +106,15 @@ export function AdminVersionHistory({
                       Set Live
                     </button>
                   )}
-                  <a href={item.downloadUrl} download className="admin-action-btn">
+                  <a
+                    href={item.downloadUrl}
+                    download
+                    onClick={(e) => {
+                      e.preventDefault()
+                      void downloadApkFile(item.downloadUrl, showToast)
+                    }}
+                    className="admin-action-btn"
+                  >
                     ↓ Download
                   </a>
                   {apkVersions.length > 1 && (

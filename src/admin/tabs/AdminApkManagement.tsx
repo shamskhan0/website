@@ -3,6 +3,7 @@ import type { ApkVersion } from '../../types'
 import { promoteToLive } from '../apkStatus'
 import { uploadFile } from '../../supabase'
 import { pushCloudData, pushCloudSettings, cloudSyncEnabled } from '../../cloudSync'
+import { downloadApkFile } from '../../apkDownload'
 import type { SiteSettings } from '../../types'
 
 export function AdminApkManagement({
@@ -145,7 +146,15 @@ export function AdminApkManagement({
         </div>
 
         <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <a href={liveApk.downloadUrl || '/roshan-digital-v2.0.0.apk'} download className="admin-action-btn">
+          <a
+            href={liveApk.downloadUrl || '/roshan-digital-v2.0.0.apk'}
+            download
+            onClick={(e) => {
+              e.preventDefault()
+              void downloadApkFile(liveApk.downloadUrl, showToast)
+            }}
+            className="admin-action-btn"
+          >
             ↓ Download Current APK
           </a>
           <button
