@@ -129,33 +129,18 @@ export async function uploadFile(
   const path = `${folder}/${safeName}`
 
   onProgress?.(10)
-  let uploadError: { message: string } | null = null
-  const contentType = file.type || 'application/octet-stream'
-  const { error: firstError } = await supabase.storage
+  // APK files hamesha octet-stream ke saath upload karte hain — Supabase
+  // bucket restrictions APK ke specific MIME type par kabhi kabhi block karte
+  // hain, jabke octet-stream (generic binary) har bucket mein allowed hota hai.
+  // File ka asli type preserve karne ke liye x-file-content-type header bhejte hain.
+  const contentType = 'application/octet-stream'
+  const { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
     .upload(path, file, { upsert: false, contentType })
-  uploadError = firstError
-
-  // Agar bucket ki allowed_mime_types APK ka MIME type reject kare
-  // ("mime type application/vnd.android.package-archive is not supported"),
-  // to generic octet-stream ke saath dobara koshish karo.
-  if (uploadError && uploadError.message.toLowerCase().includes('mime type') && contentType !== 'application/octet-stream') {
-    const { error: retryError } = await supabase.storage
-      .from(MEDIA_BUCKET)
-      .upload(path, file, { upsert: false, contentType: 'application/octet-stream' })
-    uploadError = retryError
-  }
 
   if (uploadError) {
     console.error('uploadFile:', uploadError.message)
-    const friendly = describeSupabaseError(uploadError)
-    if (uploadError.message.toLowerCase().includes('mime type')) {
-      return {
-        error:
-          'Storage bucket APK files allow nahi karta. Supabase Dashboard → Storage → media bucket → Settings mein "Allowed MIME types" ko empty (sab allowed) kar dein, ya application/vnd.android.package-archive add karein.',
-      }
-    }
-    return { error: friendly }
+    return { error: describeSupabaseError(uploadError) }
   }
   onProgress?.(80)
   const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path)
