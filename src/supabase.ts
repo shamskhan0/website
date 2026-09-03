@@ -105,6 +105,48 @@ export async function uploadImage(
 }
 
 /**
+ * Upload any binary file (APK, ZIP, etc.) to the public `media` bucket.
+ * APK files ko 'apk/' folder mein rakhta hai. Returns permanent public URL.
+ */
+export async function uploadFile(
+  file: File,
+  folder = 'apk',
+  onProgress?: (percent: number) => void,
+): Promise<{ url: string; path: string } | { error: string }> {
+  if (!supabase) {
+    return { error: 'Supabase is not configured — deployment issue, please redeploy.' }
+  }
+  if (file.size === 0) {
+    return { error: 'The selected file is empty.' }
+  }
+  const MAX_FILE_BYTES = 150 * 1024 * 1024 // 150MB
+  if (file.size > MAX_FILE_BYTES) {
+    return { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum is 150MB.` }
+  }
+
+  const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin' : 'bin'
+  const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
+  const path = `${folder}/${safeName}`
+
+  onProgress?.(10)
+  const { error } = await supabase.storage
+    .from(MEDIA_BUCKET)
+    .upload(path, file, { upsert: false, contentType: file.type || 'application/octet-stream' })
+  if (error) {
+    console.error('uploadFile:', error.message)
+    return { error: describeSupabaseError(error) }
+  }
+  onProgress?.(80)
+  const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path)
+  if (!data?.publicUrl) {
+    await supabase.storage.from(MEDIA_BUCKET).remove([path]).catch(() => undefined)
+    return { error: 'Upload succeeded but URL generation failed. Is the bucket public?' }
+  }
+  onProgress?.(100)
+  return { url: data.publicUrl, path }
+}
+
+/**
  * Delete an image from the `media` bucket given its full public URL.
  * Best-effort: failures are logged but never block the DB update.
  */

@@ -1,17 +1,24 @@
 import { useState } from 'react'
 import type { ApkVersion } from '../../types'
 import { promoteToLive } from '../apkStatus'
+import { uploadFile } from '../../supabase'
+import { pushCloudData, pushCloudSettings, cloudSyncEnabled } from '../../cloudSync'
+import type { SiteSettings } from '../../types'
 
 export function AdminApkManagement({
   apkVersions,
   setApkVersions,
   liveApk,
   showToast,
+  siteSettings,
+  setSiteSettings,
 }: {
   apkVersions: ApkVersion[]
   setApkVersions: (versions: ApkVersion[]) => void
   liveApk: ApkVersion
   showToast: (msg: string) => void
+  siteSettings: SiteSettings
+  setSiteSettings: (s: SiteSettings) => void
 }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [versionName, setVersionName] = useState('2.1.0')
@@ -23,6 +30,7 @@ export function AdminApkManagement({
     'Enhanced AI Investment engine accuracy\nInstant withdrawal settlement\nBug fixes and speed improvements'
   )
   const [isUploading, setIsUploading] = useState(false)
+  const [status, setStatus] = useState('')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -33,35 +41,76 @@ export function AdminApkManagement({
     }
   }
 
-  const handlePublish = (e: React.FormEvent) => {
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!selectedFile) {
+      showToast('Pehle APK file select karein.')
+      return
+    }
+    if (!selectedFile.name.toLowerCase().endsWith('.apk')) {
+      showToast('Sirf .apk file upload karein.')
+      return
+    }
+
     setIsUploading(true)
+    setStatus('APK Supabase Storage par upload ho rahi hai… (150MB tak me waqt lag sakta hai)')
 
-    setTimeout(() => {
-      const newApk: ApkVersion = {
-        id: `apk-${Date.now()}`,
-        version: versionName.trim().replace(/^v/i, ''),
-        build: parseInt(buildNumber) || 210,
-        releaseDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
-        size: fileSize,
-        status: releaseChannel,
-        minAndroid,
-        downloads: 0,
-        sha256: Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-        changelog: changelogText.split('\n').filter((line) => line.trim().length > 0),
-        downloadUrl: '/roshan-digital-v2.0.0.apk',
-      }
-
-      let updatedList = apkVersions
-      if (releaseChannel === 'LIVE') {
-        updatedList = promoteToLive(updatedList, newApk.id)
-      }
-
-      setApkVersions([newApk, ...updatedList])
+    // STEP 1: Real upload to Supabase Storage
+    const result = await uploadFile(selectedFile, 'apk')
+    if ('error' in result) {
       setIsUploading(false)
+      setStatus('')
+      showToast(`Upload failed: ${result.error}`)
+      return
+    }
+
+    // STEP 2: Save record with REAL download URL to cloud database
+    setStatus('Database mein save ho raha hai…')
+    const newApk: ApkVersion = {
+      id: `apk-${Date.now()}`,
+      version: versionName.trim().replace(/^v/i, ''),
+      build: parseInt(buildNumber) || 210,
+      releaseDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
+      size: fileSize,
+      status: releaseChannel,
+      minAndroid,
+      downloads: 0,
+      sha256: Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
+      changelog: changelogText.split('\n').filter((line) => line.trim().length > 0),
+      downloadUrl: result.url, // ✅ REAL Supabase Storage URL — ab APK hi download hogi
+    }
+
+    let updatedList = apkVersions
+    if (releaseChannel === 'LIVE') {
+      updatedList = promoteToLive(updatedList, newApk.id)
+    }
+    const nextList = [newApk, ...updatedList]
+    setApkVersions(nextList)
+
+    if (cloudSyncEnabled) {
+      const ops: Promise<boolean>[] = [pushCloudData('apk_versions', nextList)]
+      // LIVE release par website ke download buttons bhi nayi APK par point karo
+      if (releaseChannel === 'LIVE') {
+        const nextSettings = { ...siteSettings, apkDownloadUrl: result.url }
+        setSiteSettings(nextSettings)
+        ops.push(pushCloudSettings(nextSettings))
+      }
+      const results = await Promise.all(ops)
+      setIsUploading(false)
+      setStatus('')
       setSelectedFile(null)
-      showToast(`APK v${newApk.version} successfully published to ${releaseChannel}!`)
-    }, 600)
+      if (results.every(Boolean)) {
+        showToast(`✅ APK v${newApk.version} published! Website ka download button ab nayi APK serve karega — har browser/device par.`)
+      } else {
+        showToast('⚠️ APK upload hui lekin database save fail — dobara Deploy dabaein.')
+      }
+    } else {
+      setIsUploading(false)
+      setStatus('')
+      setSelectedFile(null)
+      showToast(`APK v${newApk.version} saved locally (cloud sync off).`)
+    }
   }
 
   return (
@@ -95,8 +144,8 @@ export function AdminApkManagement({
           </div>
         </div>
 
-        <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-          <a href="/roshan-digital-v2.0.0.apk" download className="admin-action-btn">
+        <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <a href={liveApk.downloadUrl || '/roshan-digital-v2.0.0.apk'} download className="admin-action-btn">
             ↓ Download Current APK
           </a>
           <button
@@ -200,9 +249,17 @@ export function AdminApkManagement({
           </div>
 
           <div style={{ marginTop: '22px' }}>
+            {status && (
+              <div className="admin-toast" style={{ marginBottom: '14px' }}>
+                <span>↥</span> {status}
+              </div>
+            )}
             <button type="submit" className="button button-primary" disabled={isUploading}>
-              {isUploading ? 'Verifying & Deploying...' : 'Deploy & Publish APK ↗'}
+              {isUploading ? 'Deploying… (upload + DB save chal raha hai)' : '🚀 Deploy & Publish APK ↗'}
             </button>
+            <small style={{ display: 'block', marginTop: '8px', color: '#94a3b8' }}>
+              Deploy dabate hi APK Supabase Storage par upload ho kar database mein save hogi — website ka download button phir direct ye APK download karega.
+            </small>
           </div>
         </form>
       </div>

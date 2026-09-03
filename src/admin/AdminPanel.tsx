@@ -277,6 +277,8 @@ export function AdminDashboard({
             setApkVersions={setApkVersions}
             liveApk={liveApk}
             showToast={showToast}
+            siteSettings={siteSettings}
+            setSiteSettings={setSiteSettings}
           />
         )}
 
