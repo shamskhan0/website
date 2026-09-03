@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
-import { uploadImage } from '../../supabase'
+import { deleteImageByUrl, uploadImage } from '../../supabase'
 
 const MEDIA_LIBRARY_DEFS = [
   {
@@ -153,52 +153,45 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
   }, [categoryFilter, entries, query, sortMode])
 
   const handleImageUpload = async (key: string, file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setStatusMessage('Invalid file type. Upload a JPG, PNG, WEBP, or SVG image.')
+    setStatusMessage('Uploading image…')
+    const result = await uploadImage(file, 'media-library')
+    if ('error' in result) {
+      setStatusMessage(`Upload failed: ${result.error}`)
       return
     }
 
-    const maxBytes = key.includes('logo') ? 2 * 1024 * 1024 : 3 * 1024 * 1024
-    if (file.size > maxBytes) {
-      setStatusMessage(`Image too large. Please use a file under ${Math.round(maxBytes / 1024 / 1024)}MB.`)
-      return
+    const current = formData.images?.[key]
+    const oldUrl = current?.url || ''
+    const nextImage: ManagedImage = {
+      ...(current ?? createManagedImage(key, '', file.name)),
+      key,
+      url: result.url,
+      fileName: file.name,
+      uploadDate: current?.uploadDate ?? new Date().toISOString(),
+      updatedDate: new Date().toISOString(),
+      active: true,
+      version: (current?.version ?? 0) + 1,
     }
 
-    try {
-      const uploadedUrl = await uploadImage(file, 'media-library')
-      if (!uploadedUrl) {
-        setStatusMessage('Upload failed. Please try another image file.')
-        return
-      }
+    setFormData((prev) => ({
+      ...prev,
+      images: {
+        ...(prev.images ?? {}),
+        [key]: nextImage,
+      },
+    }))
 
-      const current = formData.images?.[key]
-      const nextImage: ManagedImage = {
-        ...(current ?? createManagedImage(key, '', file.name)),
-        key,
-        url: uploadedUrl,
-        fileName: file.name,
-        uploadDate: current?.uploadDate ?? new Date().toISOString(),
-        updatedDate: new Date().toISOString(),
-        active: true,
-        version: (current?.version ?? 0) + 1,
-      }
+    setStatusMessage(`${key.replace(/_/g, ' ')} uploaded to Supabase Storage. Press "Save Media Library" to publish it on the live site.`)
 
-      setFormData((prev) => ({
-        ...prev,
-        images: {
-          ...(prev.images ?? {}),
-          [key]: nextImage,
-        },
-      }))
-
-      setStatusMessage(`${key.replace(/_/g, ' ')} uploaded successfully.`)
-    } catch {
-      setStatusMessage('Upload failed. Please check your connection and try again.')
+    // Safe replace: new URL saved first, old storage file removed after.
+    if (oldUrl && oldUrl !== result.url) {
+      await deleteImageByUrl(oldUrl)
     }
   }
 
-  const handleImageDelete = (key: string) => {
+  const handleImageDelete = async (key: string) => {
     const current = formData.images?.[key]
+    const removedUrl = current?.url || ''
     const nextImage: ManagedImage = {
       ...(current ?? createManagedImage(key, '')),
       key,
@@ -216,7 +209,11 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
         [key]: nextImage,
       },
     }))
-    setStatusMessage(`${key.replace(/_/g, ' ')} removed from the managed media library.`)
+    setStatusMessage(`${key.replace(/_/g, ' ')} removed. Press "Save Media Library" to publish the change, then the storage file is deleted.`)
+
+    if (removedUrl) {
+      await deleteImageByUrl(removedUrl)
+    }
   }
 
   const handleSave = () => {

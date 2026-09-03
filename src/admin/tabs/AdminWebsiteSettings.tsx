@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
-import { uploadImage } from '../../supabase'
+import { deleteImageByUrl, uploadImage } from '../../supabase'
 
 const IMAGE_CONFIG = [
   {
@@ -59,51 +59,45 @@ export function AdminWebsiteSettings({
   }
 
   const handleImageUpload = async (key: string, file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setStatusMessage('Invalid file type. Please upload a JPG, PNG, GIF, or WebP image.')
+    setStatusMessage('Uploading image…')
+    const result = await uploadImage(file, 'website-settings')
+
+    if ('error' in result) {
+      setStatusMessage(`Upload failed: ${result.error}`)
       return
     }
 
-    if (file.size > 3 * 1024 * 1024) {
-      setStatusMessage('File too large. Please upload an image under 3MB for best results.')
-      return
+    const current = formData.images?.[key]
+    const oldUrl = current?.url || ''
+    const nextImage: ManagedImage = {
+      ...(current ?? createManagedImage(key, '', file.name)),
+      key,
+      url: result.url,
+      fileName: file.name,
+      uploadDate: current?.uploadDate ?? new Date().toISOString(),
+      updatedDate: new Date().toISOString(),
+      active: true,
+      version: (current?.version ?? 0) + 1,
     }
 
-    try {
-      const uploadedUrl = await uploadImage(file, 'website-settings')
+    setFormData((prev) => ({
+      ...prev,
+      images: {
+        ...(prev.images ?? {}),
+        [key]: nextImage,
+      },
+    }))
+    setStatusMessage(`${key.replace(/_/g, ' ')} uploaded to Supabase Storage. Press "Save Website Settings" to publish it on the live site.`)
 
-      if (!uploadedUrl) {
-        setStatusMessage('Upload failed. Please try a different image file.')
-        return
-      }
-
-      const current = formData.images?.[key]
-      const nextImage: ManagedImage = {
-        ...(current ?? createManagedImage(key, '', file.name)),
-        key,
-        url: uploadedUrl,
-        fileName: file.name,
-        uploadDate: current?.uploadDate ?? new Date().toISOString(),
-        updatedDate: new Date().toISOString(),
-        active: true,
-        version: (current?.version ?? 0) + 1,
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        images: {
-          ...(prev.images ?? {}),
-          [key]: nextImage,
-        },
-      }))
-      setStatusMessage(`${key.replace(/_/g, ' ')} updated successfully.`)
-    } catch {
-      setStatusMessage('Upload failed. Please check your connection and try again.')
+    // Safe replace: DB already points to the NEW url before the old file is removed.
+    if (oldUrl && oldUrl !== result.url) {
+      await deleteImageByUrl(oldUrl)
     }
   }
 
-  const handleImageDelete = (key: string) => {
+  const handleImageDelete = async (key: string) => {
     const current = formData.images?.[key]
+    const removedUrl = current?.url || ''
     const nextImage: ManagedImage = {
       ...(current ?? createManagedImage(key, '')),
       key,
@@ -121,7 +115,11 @@ export function AdminWebsiteSettings({
         [key]: nextImage,
       },
     }))
-    setStatusMessage(`${key.replace(/_/g, ' ')} removed from the managed image set.`)
+    setStatusMessage(`${key.replace(/_/g, ' ')} removed. Press "Save Website Settings" to publish the change, then the storage file is deleted.`)
+
+    if (removedUrl) {
+      await deleteImageByUrl(removedUrl)
+    }
   }
 
   return (

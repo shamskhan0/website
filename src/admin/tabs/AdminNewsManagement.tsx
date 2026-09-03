@@ -94,17 +94,13 @@ export function AdminNewsManagement({
       return
     }
 
-    try {
-      const uploadedUrl = await uploadImage(file, 'features')
-      if (!uploadedUrl) {
-        showToast('Upload failed. Please try a different image.')
-        return
-      }
-      setFeatureImage(uploadedUrl)
-      showToast('Feature image uploaded successfully.')
-    } catch {
-      showToast('Upload failed. Please check your connection.')
+    const result = await uploadImage(file, 'features')
+    if ('error' in result) {
+      showToast(`Upload failed: ${result.error}`)
+      return
     }
+    setFeatureImage(result.url)
+    showToast('Feature image uploaded to Supabase Storage. Press "Add / Update Feature" to publish it.')
   }
 
   const handleAddNews = (e: React.FormEvent) => {
@@ -187,17 +183,13 @@ export function AdminNewsManagement({
       return
     }
 
-    try {
-      const uploadedUrl = await uploadImage(file, 'news')
-      if (!uploadedUrl) {
-        showToast('Upload failed. Please try a different image.')
-        return
-      }
-      setImageUrl(uploadedUrl)
-      showToast('Image uploaded successfully.')
-    } catch {
-      showToast('Upload failed. Please check your connection.')
+    const result = await uploadImage(file, 'news')
+    if ('error' in result) {
+      showToast(`Upload failed: ${result.error}`)
+      return
     }
+    setImageUrl(result.url)
+    showToast('Image uploaded to Supabase Storage. Press "Publish" to publish the article.')
   }
 
   const resetNewsForm = () => {

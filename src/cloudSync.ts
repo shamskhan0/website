@@ -1,21 +1,24 @@
 /**
  * Cloud Sync for Site Settings (images, announcement, hero text, etc.)
  *
- * Backed by Supabase — a single row in the `site_settings` table
- * (id = 1, `data` jsonb column) holds the whole settings object.
+ * Backed by Supabase — the whole settings object is stored as one JSONB
+ * row in the `cloud_data` table under the key `site_settings`:
  *
- * One-time setup in the Supabase SQL Editor (Dashboard → SQL Editor):
- *
- *   create table if not exists site_settings (
- *     id int primary key default 1,
- *     data jsonb not null default '{}'::jsonb,
+ *   create table if not exists cloud_data (
+ *     key text primary key,
+ *     value jsonb not null,
  *     updated_at timestamptz not null default now()
  *   );
- *   alter table site_settings enable row level security;
- *   create policy "read settings" on site_settings for select using (true);
- *   create policy "insert settings" on site_settings for insert with check (true);
- *   create policy "update settings" on site_settings for update using (true) with check (true);
- *   insert into site_settings (id) values (1) on conflict do nothing;
+ *   alter table cloud_data enable row level security;
+ *   create policy "read cloud_data" on cloud_data for select using (true);
+ *   create policy "write cloud_data" on cloud_data for insert with check (true);
+ *   create policy "update cloud_data" on cloud_data for update using (true) with check (true);
+ *
+ * NOTE: the legacy `site_settings` table is no longer used. It was removed
+ * because its RLS policies blocked anon INSERT/UPDATE (401 42501) which made
+ * admin saves silently fail — images then only lived in one browser's
+ * localStorage. `cloud_data` has working RLS policies (verified live) and is
+ * the single source of truth.
  *
  * If Supabase env vars are not configured, everything falls back to
  * localStorage-only mode (old behaviour) and nothing breaks.
@@ -30,15 +33,15 @@ export async function fetchCloudSettings<T>(): Promise<T | null> {
   if (!supabase) return null;
   try {
     const { data, error } = await supabase
-      .from('site_settings')
-      .select('data')
-      .eq('id', 1)
+      .from('cloud_data')
+      .select('value')
+      .eq('key', 'site_settings')
       .maybeSingle();
     if (error) {
       console.error('fetchCloudSettings:', error.message);
       return null;
     }
-    return (data?.data as T) ?? null;
+    return (data?.value as T) ?? null;
   } catch {
     return null;
   }
@@ -48,9 +51,9 @@ export async function fetchCloudSettings<T>(): Promise<T | null> {
 export async function pushCloudSettings(settings: unknown): Promise<boolean> {
   if (!supabase) return false;
   try {
-    const { error } = await supabase.from('site_settings').upsert({
-      id: 1,
-      data: settings,
+    const { error } = await supabase.from('cloud_data').upsert({
+      key: 'site_settings',
+      value: settings,
       updated_at: new Date().toISOString(),
     });
     if (error) {
