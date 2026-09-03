@@ -39,9 +39,11 @@ const createManagedImage = (key: string, url: string, fileName: string = 'upload
 export function AdminWebsiteSettings({
   settings,
   onSave,
+  onPublishAll,
 }: {
   settings: SiteSettings
   onSave: (newSettings: SiteSettings) => void
+  onPublishAll?: (newSettings: SiteSettings) => Promise<string>
 }) {
   const [formData, setFormData] = useState<SiteSettings>(settings)
   const [lastSettings, setLastSettings] = useState<SiteSettings>(settings)
@@ -52,10 +54,20 @@ export function AdminWebsiteSettings({
     setFormData(settings)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [publishing, setPublishing] = useState(false)
+
+  const handlePublishAll = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSave(formData)
-    setStatusMessage('Website settings saved and image assignments updated.')
+    if (onPublishAll) {
+      setPublishing(true)
+      setStatusMessage('Publishing to live website…')
+      const msg = await onPublishAll(formData)
+      setStatusMessage(msg)
+      setPublishing(false)
+    } else {
+      onSave(formData)
+      setStatusMessage('Website settings saved and image assignments updated.')
+    }
   }
 
   const handleImageUpload = async (key: string, file: File) => {
@@ -131,7 +143,7 @@ export function AdminWebsiteSettings({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handlePublishAll}>
         <div className="admin-form-grid">
           <div className="admin-form-group full-width">
             <label>Announcement Bar Text</label>
@@ -304,10 +316,13 @@ export function AdminWebsiteSettings({
           </div>
         </div>
 
-        <div style={{ marginTop: '26px' }}>
-          <button type="submit" className="button button-primary">
-            Save Website Settings <span>✓</span>
+        <div style={{ marginTop: '26px', display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button type="submit" className="button button-primary" disabled={publishing}>
+            {publishing ? 'Publishing…' : <>🚀 Save & Publish on Website <span>✓</span></>}
           </button>
+          <small style={{ color: '#94a3b8', maxWidth: '420px', lineHeight: 1.5 }}>
+            Ek click mein settings + images + features + news + APK sab kuch live website par publish ho jayega — har browser/device par nazar aayega.
+          </small>
         </div>
       </form>
     </div>

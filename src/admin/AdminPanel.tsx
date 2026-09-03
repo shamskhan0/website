@@ -8,7 +8,7 @@ import { AdminDownloadsAnalytics } from './tabs/AdminDownloadsAnalytics'
 import { AdminWebsiteSettings } from './tabs/AdminWebsiteSettings'
 import { MediaLibrary } from './tabs/MediaLibrary'
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from '../types'
-import { cloudSyncEnabled, pushCloudSettings } from '../cloudSync'
+import { cloudSyncEnabled, pushCloudSettings, pushCloudData } from '../cloudSync'
 
 /**
  * Save settings locally AND push to the cloud so every visitor of the
@@ -296,8 +296,23 @@ export function AdminDashboard({
         {active === 'Website settings' && (
           <AdminWebsiteSettings
             settings={siteSettings}
-            onSave={(newSettings) => {
-              void saveWithCloud(newSettings, 'Website settings').then(showToast)
+            onSave={() => undefined}
+            onPublishAll={async (newSettings) => {
+              setSiteSettings(newSettings)
+              if (!cloudSyncEnabled) {
+                return 'Saved locally. (Cloud sync configured nahi hai — VITE_SUPABASE_URL aur VITE_SUPABASE_ANON_KEY .env mein set karein.)'
+              }
+              // Sab kuch ek saath cloud par publish karo: settings + features + news + APK
+              const results = await Promise.all([
+                pushCloudSettings(newSettings),
+                pushCloudData('features', featuresList),
+                pushCloudData('news', newsList),
+                pushCloudData('apk_versions', apkVersions),
+              ])
+              const okCount = results.filter(Boolean).length
+              return okCount === results.length
+                ? '✅ Published! Sab kuch (settings, images, features, news, APK) live website par save ho gaya — har browser/device par ab naya content nazar aayega.'
+                : `⚠️ Sirf ${okCount}/${results.length} cheezein publish huin. Internet check karein aur dobara "Save & Publish" dabaein.`
             }}
           />
         )}
