@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 const env = import.meta.env as ImportMetaEnv & Record<string, string | undefined>
-const supabaseUrl = env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY
 
 export const supabaseEnabled = Boolean(supabaseUrl && supabaseAnonKey)
 
@@ -57,7 +57,8 @@ export async function uploadImage(
   onProgress?: (percent: number) => void,
 ): Promise<{ url: string; path: string } | { error: string }> {
   if (!supabase) {
-    return { error: 'Supabase is not configured. Add the project URL and publishable key to the app environment.' }
+    console.error('[v0] Supabase upload unavailable: public client configuration was not embedded in the production bundle.')
+    return { error: 'Supabase upload is unavailable in this deployment. Please redeploy the latest version.' }
   }
   if (!file.type.startsWith('image/')) {
     return { error: 'Invalid file type. Please upload a JPG, PNG, WebP, GIF or SVG image.' }
