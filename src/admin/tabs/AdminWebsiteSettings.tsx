@@ -92,6 +92,31 @@ export function AdminWebsiteSettings({
       version: (current?.version ?? 0) + 1,
     }
 
+    const nextFormData: SiteSettings = {
+      ...formData,
+      images: {
+        ...(formData.images ?? {}),
+        [key]: nextImage,
+      },
+    }
+    setFormData(nextFormData)
+
+    // AUTO-PUBLISH: upload hote hi image seedha live website par show ho jaye.
+    // (DB update pehle, purani file delete baad mein — safe replace order.)
+    if (onPublishAll) {
+      setStatusMessage('Image uploaded — publishing to live website…')
+      const msg = await onPublishAll(nextFormData)
+      if (oldUrl && oldUrl !== result.url) {
+        await deleteImageByUrl(oldUrl)
+      }
+      setStatusMessage(`✅ ${file.name} live website par publish ho gaya — har browser/device par nazar aayega.`)
+      // Publish ke baad parent ka settings state update ho chuka hoga; local
+      // formData ko wapas sync karo taake next publish stale data na bheje.
+      setFormData((prev) => prev)
+      void msg
+      return
+    }
+
     setFormData((prev) => ({
       ...prev,
       images: {

@@ -8,13 +8,27 @@ export function AdminNewsManagement({
   newsList,
   setNewsList,
   showToast,
+  onPublish,
 }: {
   featuresList: FeatureItem[]
   setFeaturesList: (items: FeatureItem[]) => void
   newsList: NewsItem[]
   setNewsList: (items: NewsItem[]) => void
   showToast: (msg: string) => void
+  onPublish?: () => Promise<string>
 }) {
+  const [publishing, setPublishing] = useState(false)
+
+  const handlePublish = async () => {
+    if (!onPublish) {
+      showToast('Publish function available nahi hai.')
+      return
+    }
+    setPublishing(true)
+    const msg = await onPublish()
+    showToast(msg)
+    setPublishing(false)
+  }
   const [featureTitle, setFeatureTitle] = useState('')
   const [featureText, setFeatureText] = useState('')
   const [featureIcon, setFeatureIcon] = useState('✦')
@@ -525,6 +539,27 @@ export function AdminNewsManagement({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* PUBLISH TO DATABASE — ek click mein features + news live website par */}
+      <div className="admin-card" style={{ borderTop: '2px solid rgba(52, 211, 153, 0.4)' }}>
+        <div className="admin-card-header">
+          <div>
+            <h3>🚀 Publish to Website</h3>
+            <p>Ek click mein Features + News database (Supabase) mein save ho kar live website par show honge — har browser/device par.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="button button-primary"
+          onClick={handlePublish}
+          disabled={publishing}
+        >
+          {publishing ? 'Publishing…' : <>✅ Save & Publish Features + News <span>→</span></>}
+        </button>
+        <small style={{ display: 'block', marginTop: '10px', color: '#94a3b8' }}>
+          Ye button sab feature cards aur news articles Supabase database mein save karta hai. Upload ki gayi pictures bhi automatically live ho jati hain.
+        </small>
       </div>
     </div>
   )

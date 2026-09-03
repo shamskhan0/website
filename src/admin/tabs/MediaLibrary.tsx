@@ -114,7 +114,7 @@ const categoryOptions = [
   'Other',
 ]
 
-export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onSave: (newSettings: SiteSettings) => void }) {
+export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: SiteSettings; onSave: (newSettings: SiteSettings) => void; onPublishAll?: (newSettings: SiteSettings) => Promise<string> }) {
   const [formData, setFormData] = useState<SiteSettings>(settings)
   const [statusMessage, setStatusMessage] = useState('')
   const [query, setQuery] = useState('')
@@ -171,6 +171,26 @@ export function MediaLibrary({ settings, onSave }: { settings: SiteSettings; onS
       updatedDate: new Date().toISOString(),
       active: true,
       version: (current?.version ?? 0) + 1,
+    }
+
+    const nextFormData: SiteSettings = {
+      ...formData,
+      images: {
+        ...(formData.images ?? {}),
+        [key]: nextImage,
+      },
+    }
+    setFormData(nextFormData)
+
+    // AUTO-PUBLISH: upload hote hi image seedha live website par.
+    if (onPublishAll) {
+      setStatusMessage('Image uploaded — publishing to live website…')
+      const msg = await onPublishAll(nextFormData)
+      if (oldUrl && oldUrl !== result.url) {
+        await deleteImageByUrl(oldUrl)
+      }
+      setStatusMessage(msg)
+      return
     }
 
     setFormData((prev) => ({

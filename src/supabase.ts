@@ -1,8 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
 const env = import.meta.env as ImportMetaEnv & Record<string, string | undefined>
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY
+// Env vars pehle (Vercel/Next-style names bhi), phir publishable-key fallback
+// taake "Supabase is not configured" error kabhi na aaye — ye PUBLIC anon key
+// hai (RLS-protected, browser-safe), secret key NAHI.
+const supabaseUrl = env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL ||
+  'https://hkoorpktsjxahgifkkei.supabase.co'
+const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY ||
+  'sb_publishable_-LekehNVvLfIjCvieHV8Zg_c7-3nPRr'
 
 export const supabaseEnabled = Boolean(supabaseUrl && supabaseAnonKey)
 

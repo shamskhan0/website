@@ -179,6 +179,21 @@ export function AdminDashboard({
   }
 
   const saveWithCloud = useCloudSave(setSiteSettings)
+  void saveWithCloud // kept for future per-tab saves; publish flow now handles sync
+
+  // Feature/News tab ka publish button: features + news ek click mein database mein save
+  const publishFeaturesAndNews = async (): Promise<string> => {
+    if (!cloudSyncEnabled) {
+      return 'Saved locally. (Cloud sync configured nahi hai — env vars check karein.)'
+    }
+    const results = await Promise.all([
+      pushCloudData('features', featuresList),
+      pushCloudData('news', newsList),
+    ])
+    return results.every(Boolean)
+      ? '✅ Features + News database mein save ho gaye — live website par har browser/device par nazar aayenge.'
+      : '⚠️ Publish fail hui. Internet check karein aur dobara "Save & Publish" dabaein.'
+  }
 
   // Clear any pending toast timer when the dashboard unmounts (e.g. on logout)
   useEffect(() => {
@@ -251,6 +266,7 @@ export function AdminDashboard({
             newsList={newsList}
             setNewsList={setNewsList}
             showToast={showToast}
+            onPublish={publishFeaturesAndNews}
           />
         )}
 
@@ -281,6 +297,7 @@ export function AdminDashboard({
             newsList={newsList}
             setNewsList={setNewsList}
             showToast={showToast}
+            onPublish={publishFeaturesAndNews}
           />
         )}
 
@@ -321,8 +338,16 @@ export function AdminDashboard({
         {active === 'Media library' && (
           <MediaLibrary
             settings={siteSettings}
-            onSave={(newSettings) => {
-              void saveWithCloud(newSettings, 'Media library').then(showToast)
+            onSave={() => undefined}
+            onPublishAll={async (newSettings) => {
+              setSiteSettings(newSettings)
+              if (!cloudSyncEnabled) {
+                return 'Saved locally. (Cloud sync configured nahi hai.)'
+              }
+              const ok = await pushCloudSettings(newSettings)
+              return ok
+                ? '✅ Image live website par publish ho gayi — har browser/device par nazar aayegi.'
+                : '⚠️ Cloud sync fail hui. Internet check karein aur dobara try karein.'
             }}
           />
         )}
