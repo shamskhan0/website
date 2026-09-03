@@ -129,11 +129,13 @@ export async function uploadFile(
   const path = `${folder}/${safeName}`
 
   onProgress?.(10)
-  // APK files hamesha octet-stream ke saath upload karte hain — Supabase
-  // bucket restrictions APK ke specific MIME type par kabhi kabhi block karte
-  // hain, jabke octet-stream (generic binary) har bucket mein allowed hota hai.
-  // File ka asli type preserve karne ke liye x-file-content-type header bhejte hain.
-  const contentType = 'application/octet-stream'
+  // APK ko hamesha iske sahi MIME type ke saath upload karo. Bucket par koi
+  // MIME restriction nahi hai (verified: application/vnd.android.package-archive,
+  // application/octet-stream aur text/html sab HTTP 200 accept hote hain).
+  // Sahi content-type zaroori hai taake browser/Android download ko real APK
+  // samjhe, aur object metadata mein bhi yehi type save ho.
+  const APK_MIME = 'application/vnd.android.package-archive'
+  const contentType = APK_MIME
   const { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
     .upload(path, file, { upsert: false, contentType })
