@@ -351,31 +351,44 @@ function App() {
 
   // ---- Features/news/APK changes ko cloud par push karo (admin panel se) ----
   // Pehla render skip hota hai taake init data dobara upload na ho.
-  const featuresSynced = useRef(false)
-  const newsSynced = useRef(false)
-  const apkSynced = useRef(false)
+  // FIX: pehle sirf 'pehli change skip' hoti thi — agar cloud load fail/delay
+  // hota to admin ki pehli asli change (e.g. nayi APK upload) bhi skip ho kar
+  // kabhi cloud par push nahi hoti thi. Ab last-pushed JSON se compare karte
+  // hain: sirf tab skip jab value sach mein unchanged ho.
+  const featuresLastPushed = useRef<string | null>(null)
+  const newsLastPushed = useRef<string | null>(null)
+  const apkLastPushed = useRef<string | null>(null)
   useEffect(() => {
     if (!cloudSyncEnabled) return
-    if (!featuresSynced.current) {
-      featuresSynced.current = true
+    const json = JSON.stringify(featuresList)
+    if (featuresLastPushed.current === null) {
+      featuresLastPushed.current = json
       return
     }
+    if (featuresLastPushed.current === json) return
+    featuresLastPushed.current = json
     void pushCloudData('features', featuresList)
   }, [featuresList])
   useEffect(() => {
     if (!cloudSyncEnabled) return
-    if (!newsSynced.current) {
-      newsSynced.current = true
+    const json = JSON.stringify(newsList)
+    if (newsLastPushed.current === null) {
+      newsLastPushed.current = json
       return
     }
+    if (newsLastPushed.current === json) return
+    newsLastPushed.current = json
     void pushCloudData('news', newsList)
   }, [newsList])
   useEffect(() => {
     if (!cloudSyncEnabled) return
-    if (!apkSynced.current) {
-      apkSynced.current = true
+    const json = JSON.stringify(apkVersions)
+    if (apkLastPushed.current === null) {
+      apkLastPushed.current = json
       return
     }
+    if (apkLastPushed.current === json) return
+    apkLastPushed.current = json
     void pushCloudData('apk_versions', apkVersions)
   }, [apkVersions])
 
