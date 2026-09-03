@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import type { ApkVersion } from '../../types'
+import type { ApkVersion, SiteSettings } from '../../types'
 import { promoteToLive } from '../apkStatus'
 import { downloadApkFile } from '../../apkDownload'
+import { pushCloudSettings, cloudSyncEnabled } from '../../cloudSync'
 
 const STATUS_FILTERS = ['ALL', 'LIVE', 'ARCHIVED', 'BETA'] as const
 type StatusFilter = (typeof STATUS_FILTERS)[number]
@@ -10,10 +11,14 @@ export function AdminVersionHistory({
   apkVersions,
   setApkVersions,
   showToast,
+  siteSettings,
+  setSiteSettings,
 }: {
   apkVersions: ApkVersion[]
   setApkVersions: (versions: ApkVersion[]) => void
   showToast: (msg: string) => void
+  siteSettings: SiteSettings
+  setSiteSettings: (s: SiteSettings) => void
 }) {
   const [filter, setFilter] = useState<StatusFilter>('ALL')
   const [search, setSearch] = useState('')
@@ -24,8 +29,16 @@ export function AdminVersionHistory({
     return matchesFilter && matchesSearch
   })
 
+  // Live version badalne par site ka global download URL bhi us APK par point karo
   const makeLive = (id: string) => {
-    setApkVersions(promoteToLive(apkVersions, id))
+    const next = promoteToLive(apkVersions, id)
+    const live = next.find((v) => v.id === id)
+    setApkVersions(next)
+    if (live && live.downloadUrl && !live.downloadUrl.startsWith('/')) {
+      const nextSettings = { ...siteSettings, apkDownloadUrl: live.downloadUrl }
+      setSiteSettings(nextSettings)
+      if (cloudSyncEnabled) void pushCloudSettings(nextSettings)
+    }
     showToast('Updated active Live production release!')
   }
 
