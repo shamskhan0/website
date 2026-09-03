@@ -51,7 +51,7 @@ export function DownloadAppPage({
               <div><span>Android:</span> <b>{liveApk.minAndroid}</b></div>
             </div>
             <a
-              href={siteSettings.apkDownloadUrl}
+              href={liveApk.downloadUrl}
               download
               className="button button-primary download-btn"
             >

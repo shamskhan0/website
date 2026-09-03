@@ -86,7 +86,8 @@ export function AppReleaseSection({
             ))}
           </ul>
         </div>
-        <a className="button button-light" href={siteSettings.apkDownloadUrl || liveApk.downloadUrl} download>
+        {/* APK version section se connected: LIVE APK ka real Supabase Storage URL */}
+        <a className="button button-light" href={liveApk.downloadUrl} download>
           Download latest APK <span>↓</span>
         </a>
         <small className="android-note">For Android {liveApk.minAndroid} · APK file</small>

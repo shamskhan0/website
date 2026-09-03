@@ -256,7 +256,7 @@ function FaqSection() {
   )
 }
 
-function FinalDownloadCta({ siteSettings }: { siteSettings: SiteSettings }) {
+function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSettings; liveApk: ApkVersion }) {
   const heroImage = siteSettings.images?.hero_mobile_image?.url || '/app-screenshot.jpg'
 
   return (
@@ -272,7 +272,7 @@ function FinalDownloadCta({ siteSettings }: { siteSettings: SiteSettings }) {
         <h2>Experience Roshan Digital</h2>
         <p>Discover a modern digital experience designed around simplicity and convenience.</p>
         <div className="hero-actions">
-          <a className="button button-primary" href={siteSettings.apkDownloadUrl} download>Download App <span>↓</span></a>
+          <a className="button button-primary" href={liveApk.downloadUrl} download>Download App <span>↓</span></a>
         </div>
       </div>
     </section>
@@ -439,7 +439,7 @@ function App() {
         <AppJourneySection />
         <SecuritySection />
         <FaqSection />
-        <FinalDownloadCta siteSettings={siteSettings} />
+        <FinalDownloadCta siteSettings={siteSettings} liveApk={liveApk} />
         <NewsSection newsList={newsList} onSelectArticle={setSelectedArticle} />
         <ContactSection siteSettings={siteSettings} />
       </main>
