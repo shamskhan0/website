@@ -57,7 +57,8 @@ export async function uploadImage(
   onProgress?: (percent: number) => void,
 ): Promise<{ url: string; path: string } | { error: string }> {
   if (!supabase) {
-    return { error: 'Supabase is not configured. Add the project URL and publishable key to the app environment.' }
+    console.error('[v0] Supabase upload unavailable: public client configuration was not embedded in the production bundle.')
+    return { error: 'Supabase upload is unavailable in this deployment. Please redeploy the latest version.' }
   }
   if (!file.type.startsWith('image/')) {
     return { error: 'Invalid file type. Please upload a JPG, PNG, WebP, GIF or SVG image.' }
