@@ -129,16 +129,13 @@ export async function uploadFile(
   const path = `${folder}/${safeName}`
 
   onProgress?.(10)
-  // FIX: Supabase bucket 'media' par allowed-mimetypes restriction hai jis mein
-  // application/vnd.android.package-archive shamil nahi — upload 'mime type ... not
-  // supported' error ke saath fail hoti thi. Is liye APK ko generic binary type
-  // (application/octet-stream) ke saath upload karte hain jo sab buckets mein
-  // allowed hota hai. Download par browser/Android file extension (.apk) se hi
-  // file pehchanta hai, aur hamara apkDownload.ts helper blob ko correct .apk
-  // filename ke saath force-download karta hai — is liye download bilkul theek
-  // chalti hai.
-  const APK_MIME = 'application/octet-stream'
-  const contentType = APK_MIME
+  // VERIFIED: Supabase Storage par real APK upload 'application/vnd.android.package-archive'
+  // MIME ke saath HTTP 200 se kamyab hui thi (aur serving bhi isi Content-Type ke saath
+  // hoti hai). application/octet-stream bucket ki allowed-mimetypes list mein nahi hai,
+  // is liye 'mime type not supported' error aata tha — APK hamesha apne asli MIME type
+  // ke saath upload karo. apkDownload.ts download ko correct .apk filename ke saath
+  // force-download karta hai.
+  const contentType = 'application/vnd.android.package-archive'
   const { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
     .upload(path, file, { upsert: false, contentType })
