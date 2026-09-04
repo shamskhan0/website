@@ -135,9 +135,13 @@ export async function uploadFile(
   // in the object path and the download helper restores the APK filename.
   // This avoids sending a request that Storage will reject before the retry.
   const contentType = 'application/octet-stream'
+  // Re-wrap the browser File as a generic binary Blob too. This prevents
+  // Supabase Storage clients from deriving the rejected APK MIME from file.type
+  // when they build the request body.
+  const uploadBlob = new File([file], file.name, { type: contentType })
   const { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
-    .upload(path, file, { upsert: false, contentType })
+    .upload(path, uploadBlob, { upsert: false, contentType })
 
   if (uploadError) {
     console.error('uploadFile:', uploadError.message)
