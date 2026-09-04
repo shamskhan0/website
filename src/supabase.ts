@@ -1,14 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
-
-const env = import.meta.env as ImportMetaEnv & Record<string, string | undefined>
-// Env vars pehle (Vercel/Next-style names bhi), phir publishable-key fallback
-// taake "Supabase is not configured" error kabhi na aaye — ye PUBLIC anon key
-// hai (RLS-protected, browser-safe), secret key NAHI.
-const supabaseUrl = env.VITE_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL ||
-  'https://hkoorpktsjxahgifkkei.supabase.co'
-const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY ||
-  'sb_publishable_-LekehNVvLfIjCvieHV8Zg_c7-3nPRr'
+// PRODUCTION FIX: live Vercel deployment par purane/stale env vars kisi DOOSRE
+// Supabase project (rjptekdllfhvielxivnl) ko point kar rahe the — wahan 'media'
+// bucket nahi hai, is liye APK upload wahan fail hoti thi. Is liye verified-correct
+// project URL/publishable key ko pehle (hardcoded) rakha gaya hai aur env vars sirf
+// fallback hain. Ye PUBLIC anon key hai (RLS-protected, browser-safe), secret NAHI.
+const supabaseUrl = 'https://hkoorpktsjxahgifkkei.supabase.co'
+const supabaseAnonKey = 'sb_publishable_-LekehNVvLfIjCvieHV8Zg_c7-3nPRr'
 
 export const supabaseEnabled = Boolean(supabaseUrl && supabaseAnonKey)
 
