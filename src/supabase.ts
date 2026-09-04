@@ -129,15 +129,24 @@ export async function uploadFile(
   const path = `${folder}/${safeName}`
 
   onProgress?.(10)
-  // Always store APKs with their real media type so Supabase Storage and
-  // Android/browser downloads preserve the correct file semantics.
-  // Validation intentionally relies on the .apk extension rather than
-  // file.type: some browsers report an empty or generic type for APK files.
-  const APK_MIME = 'application/vnd.android.package-archive'
-  const contentType = APK_MIME
-  const { error: uploadError } = await supabase.storage
+  // Some Supabase buckets allow only application/octet-stream and reject the
+  // APK-specific MIME type. Try the correct type first, then retry the same
+  // object with a broadly allowed binary type when Storage rejects the MIME.
+  // The .apk extension remains the source of truth for client-side validation.
+  const apkContentType = 'application/vnd.android.package-archive'
+  const fallbackContentType = 'application/octet-stream'
+  let { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
-    .upload(path, file, { upsert: false, contentType })
+    .upload(path, file, { upsert: false, contentType: apkContentType })
+
+  const rejectedMime = uploadError?.message?.toLowerCase().includes('mime type')
+    || uploadError?.message?.toLowerCase().includes('not supported')
+  if (uploadError && rejectedMime) {
+    const retry = await supabase.storage
+      .from(MEDIA_BUCKET)
+      .upload(path, file, { upsert: false, contentType: fallbackContentType })
+    uploadError = retry.error
+  }
 
   if (uploadError) {
     console.error('uploadFile:', uploadError.message)
