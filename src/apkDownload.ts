@@ -45,6 +45,20 @@ export async function downloadApkFile(
       // keep fallback
     }
 
+    // Direct download for Supabase or external CDN to avoid in-memory memory bloat on mobile
+    if (url.startsWith('http') && (url.includes('supabase.co') || url.includes('/storage/'))) {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.target = '_blank'
+      a.rel = 'noopener noreferrer'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      showToast?.('✅ APK download shuru ho gayi!')
+      return
+    }
+
     const blobUrl = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = blobUrl
@@ -52,7 +66,7 @@ export async function downloadApkFile(
     document.body.appendChild(a)
     a.click()
     a.remove()
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000)
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10_000)
     showToast?.('✅ APK download shuru ho gayi!')
   } catch {
     showToast?.('❌ APK download nahi ho saki. Internet connection check karein ya dobara koshish karein.')

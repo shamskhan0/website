@@ -81,6 +81,59 @@ export async function pushCloudSettings(settings: unknown): Promise<boolean> {
  *   create policy "update cloud_data" on cloud_data for update using (true) with check (true);
  */
 
+// In-memory request deduplication cache
+const queryCache = new Map<string, { promise: Promise<any>; timestamp: number }>()
+const CACHE_TTL_MS = 60_000 // 1 minute in-memory TTL
+
+export async function fetchAllCloudBatch(): Promise<{
+  settings: unknown | null
+  features: unknown | null
+  news: unknown | null
+  apk_versions: unknown | null
+}> {
+  if (!supabase) {
+    return { settings: null, features: null, news: null, apk_versions: null }
+  }
+
+  const cacheKey = 'batch_all'
+  const cached = queryCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.promise
+  }
+
+  const promise = (async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cloud_data')
+        .select('key, value')
+        .in('key', ['site_settings', 'features', 'news', 'apk_versions'])
+
+      if (error || !data) {
+        if (error) console.error('fetchAllCloudBatch error:', error.message)
+        return { settings: null, features: null, news: null, apk_versions: null }
+      }
+
+      const map = new Map<string, unknown>()
+      for (const row of data) {
+        map.set(row.key, row.value)
+      }
+
+      return {
+        settings: map.get('site_settings') ?? null,
+        features: map.get('features') ?? null,
+        news: map.get('news') ?? null,
+        apk_versions: map.get('apk_versions') ?? null,
+      }
+    } catch (e) {
+      console.error('fetchAllCloudBatch exception:', e)
+      return { settings: null, features: null, news: null, apk_versions: null }
+    }
+  })()
+
+  queryCache.set(cacheKey, { promise, timestamp: Date.now() })
+  return promise
+}
+
 export async function fetchCloudData<T>(key: string): Promise<T | null> {
   if (!supabase) return null;
   try {

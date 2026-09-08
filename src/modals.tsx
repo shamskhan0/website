@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { NewsItem } from './types'
+import { OptimizedImage } from './components/OptimizedImage'
 
 export function ArticleReaderModal({
   article,
@@ -28,7 +29,7 @@ export function ArticleReaderModal({
         <div className="modal-body" style={{ maxHeight: '70vh' }}>
           {article.imageUrl && (
             <div style={{ borderRadius: '12px', overflow: 'hidden', height: '260px', marginBottom: '20px', position: 'relative' }}>
-              <img src={article.imageUrl} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <OptimizedImage src={article.imageUrl} alt={article.title} loading="eager" width={1200} height={600} style={{ width: '100%', height: '100%', objectFit: 'cover' }} wrapperStyle={{ height: '100%' }} />
             </div>
           )}
           <h2 style={{ fontSize: '24px', color: '#fff', margin: '0 0 16px 0', lineHeight: 1.3 }}>

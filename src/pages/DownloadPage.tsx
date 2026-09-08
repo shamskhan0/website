@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ApkVersion, SiteSettings } from '../types'
 import { downloadApkFile } from '../apkDownload'
+import { OptimizedImage } from '../components/OptimizedImage'
 
 export function DownloadAppPage({
   liveApk,
@@ -28,10 +29,15 @@ export function DownloadAppPage({
         <div className="download-hero-visual">
           <div className="download-phone-frame">
             <div className="download-phone-notch"></div>
-            <img
+            <OptimizedImage
               src={siteSettings.images?.hero_mobile_image?.url || '/app-screenshot.jpg'}
+              version={siteSettings.images?.hero_mobile_image?.version}
               alt="Roshan Digital app interface"
               className="download-phone-image"
+              loading="eager"
+              fetchPriority="high"
+              width={600}
+              height={1200}
             />
           </div>
         </div>

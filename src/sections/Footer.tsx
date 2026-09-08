@@ -1,5 +1,6 @@
 import AdBanner from '../AdBanner'
 import type { SiteSettings } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
 
 const AD_SLOT_FOOTER = '1647148764'
 
@@ -28,7 +29,7 @@ export function SiteFooter({
         <div className="footer-main">
           <div>
             <a className="brand" href="#top" aria-label="Roshan Digital">
-              <img src={logoUrl} alt="Roshan Digital" className="footer-logo-img" />
+              <OptimizedImage src={logoUrl} alt="Roshan Digital" className="footer-logo-img" loading="lazy" width={40} height={40} />
             </a>
             <p>Secure Investments. Daily Profits.<br />Smarter Decisions with AI.</p>
           </div>

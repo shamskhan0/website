@@ -1,4 +1,5 @@
 import type { SiteSettings, ApkVersion, ManagedImage } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
 
 const getManagedImageUrl = (image?: ManagedImage) => {
   if (!image?.url) return '/app-screenshot.jpg'
@@ -23,7 +24,7 @@ export function SiteHeader({
   return (
     <header className="site-header">
       <a className="brand" href="#top" aria-label="Roshan Digital home">
-        <img src={logoUrl} alt="Roshan Digital" className="brand-logo-img" />
+        <OptimizedImage src={logoUrl} alt="Roshan Digital" className="brand-logo-img" loading="eager" fetchPriority="high" width={40} height={40} />
       </a>
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">
         {menuOpen ? '×' : '☰'}
@@ -92,11 +93,15 @@ export function HeroSection({
         <div className="device-shell">
           <div className="phone-frame" aria-label="Roshan Digital dashboard screenshot">
             <div className="phone-notch" aria-hidden="true"></div>
-            <img
+            <OptimizedImage
               src={heroImage}
               alt="Roshan Digital dashboard screen"
               className="phone-screen-image"
               draggable={false}
+              loading="eager"
+              fetchPriority="high"
+              width={600}
+              height={1200}
             />
           </div>
           <div className="phone-stand" aria-hidden="true"></div>

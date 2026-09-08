@@ -1,6 +1,7 @@
 import AdBanner from '../AdBanner'
 import type { ApkVersion, FeatureItem, SiteSettings } from '../types'
 import { downloadApkFile } from '../apkDownload'
+import { OptimizedImage } from '../components/OptimizedImage'
 
 const AD_SLOT_FEATURES = '1647148762'
 
@@ -23,11 +24,14 @@ export function FeaturesSection({
           {features.map((feature, index) => (
             <article className="feature-card" key={feature.id || feature.title}>
               <div className="feature-img-wrap">
-                <img
+                <OptimizedImage
                   src={feature.image}
                   alt={feature.title}
                   className="feature-card-img"
                   loading="lazy"
+                  width={800}
+                  height={500}
+                  wrapperStyle={{ height: '100%' }}
                 />
                 <div className="feature-img-overlay"></div>
                 <span className="feature-number">0{index + 1}</span>
@@ -66,7 +70,7 @@ export function AppReleaseSection({
         <div className="orbit orbit-one"></div>
         <div className="orbit orbit-two"></div>
         <div className="app-badge">
-          <img src={logoUrl} alt="Roshan Digital" className="app-badge-logo" />
+          <OptimizedImage src={logoUrl} alt="Roshan Digital" className="app-badge-logo" loading="lazy" width={120} height={120} />
         </div>
         <div className="version-stamp">LATEST<br /><b>RELEASE</b></div>
       </div>
@@ -154,11 +158,14 @@ export function AppScreenshotsSection() {
           { src: '/features/always-improving.jpg', label: 'Always Improving' },
         ].map((shot) => (
           <figure key={shot.label} style={{ margin: 0, borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', position: 'relative' }}>
-            <img
+            <OptimizedImage
               src={shot.src}
               alt={shot.label}
               loading="lazy"
+              width={600}
+              height={180}
               style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+              wrapperStyle={{ height: '180px' }}
             />
             <figcaption style={{ padding: '10px 14px', fontSize: '12px', color: 'var(--muted)', background: 'rgba(15,23,42,0.9)', letterSpacing: '0.5px' }}>
               {shot.label}

@@ -12,7 +12,28 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     build: {
-      chunkSizeWarningLimit: 1600,
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('@supabase')) {
+                return 'supabase'
+              }
+              if (id.includes('react')) {
+                return 'vendor-react'
+              }
+              return 'vendor'
+            }
+            if (id.includes('src/admin')) {
+              return 'admin-panel'
+            }
+            if (id.includes('src/pages')) {
+              return 'legal-pages'
+            }
+          },
+        },
+      },
     },
     envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'SUPABASE_'],
     define: {

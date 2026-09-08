@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { downloadApkFile } from './apkDownload'
 import './App.css'
 import './brand.css'
@@ -6,23 +6,29 @@ import './hero-theme.css'
 import './center-hero.css'
 import './login-theme.css'
 import './pages.css'
+import './mobile-responsive.css'
 import { AnnouncementBar, HeroSection, SiteHeader } from './sections/HeaderHero'
 import { AppReleaseSection, AppScreenshotsSection, FeaturesSection } from './sections/FeaturesAndRelease'
 import { ContactSection, NewsSection } from './sections/NewsAndContact'
 import { SiteFooter } from './sections/Footer'
-import { ArticleReaderModal } from './modals'
-import { HelpCenterModal } from './modals'
-import { PrivacyPolicyModal } from './modals'
-import { AboutModal } from './modals'
-import { TermsOfServiceModal } from './modals'
-import { DisclaimerModal, CookiePolicyModal } from './modals'
-import { AdminLogin, AdminDashboard } from './admin/AdminPanel'
 import type { AdminUser } from './admin/auth'
 
+// Lazy-load Admin and Modals to avoid loading heavy code upfront
+const AdminLogin = lazy(() => import('./admin/AdminPanel').then(m => ({ default: m.AdminLogin })))
+const AdminDashboard = lazy(() => import('./admin/AdminPanel').then(m => ({ default: m.AdminDashboard })))
+const ArticleReaderModal = lazy(() => import('./modals').then(m => ({ default: m.ArticleReaderModal })))
+const HelpCenterModal = lazy(() => import('./modals').then(m => ({ default: m.HelpCenterModal })))
+const PrivacyPolicyModal = lazy(() => import('./modals').then(m => ({ default: m.PrivacyPolicyModal })))
+const AboutModal = lazy(() => import('./modals').then(m => ({ default: m.AboutModal })))
+const TermsOfServiceModal = lazy(() => import('./modals').then(m => ({ default: m.TermsOfServiceModal })))
+const DisclaimerModal = lazy(() => import('./modals').then(m => ({ default: m.DisclaimerModal })))
+const CookiePolicyModal = lazy(() => import('./modals').then(m => ({ default: m.CookiePolicyModal })))
+
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
+import { OptimizedImage } from './components/OptimizedImage'
 import { INITIAL_FEATURES, INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
 import { loadPersisted, usePersistedState } from './persistence'
-import { cloudSyncEnabled, fetchCloudSettings, fetchCloudData, pushCloudData, onSettingsChanged } from './cloudSync'
+import { cloudSyncEnabled, fetchAllCloudBatch, pushCloudData, onSettingsChanged } from './cloudSync'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
@@ -265,7 +271,7 @@ function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSetting
       <div className="final-cta-visual" aria-hidden="true">
         <div className="cta-glass-ring"></div>
         <div className="cta-phone">
-          <img src={heroImage} alt="Roshan Digital app" className="cta-phone-image" />
+          <OptimizedImage src={heroImage} alt="Roshan Digital app" className="cta-phone-image" loading="lazy" width={600} height={1200} />
         </div>
       </div>
       <div className="final-cta-copy">
@@ -311,21 +317,12 @@ function App() {
     let cancelled = false
 
     if (cloudSyncEnabled) {
-      fetchCloudSettings<SiteSettings>().then((remote) => {
-        if (!cancelled && remote && isSiteSettings(remote)) {
-          setSiteSettings(remote)
-        }
-      })
-
-      // Features, news aur APK versions bhi cloud se load karo
-      fetchCloudData<FeatureItem[]>('features').then((remote) => {
-        if (!cancelled && remote && isFeatureList(remote)) setFeaturesList(remote)
-      })
-      fetchCloudData<NewsItem[]>('news').then((remote) => {
-        if (!cancelled && remote && isNewsList(remote)) setNewsList(remote)
-      })
-      fetchCloudData<ApkVersion[]>('apk_versions').then((remote) => {
-        if (!cancelled && remote && isApkVersions(remote)) setApkVersions(remote)
+      fetchAllCloudBatch().then((batch) => {
+        if (cancelled) return
+        if (batch.settings && isSiteSettings(batch.settings)) setSiteSettings(batch.settings)
+        if (batch.features && isFeatureList(batch.features)) setFeaturesList(batch.features)
+        if (batch.news && isNewsList(batch.news)) setNewsList(batch.news)
+        if (batch.apk_versions && isApkVersions(batch.apk_versions)) setApkVersions(batch.apk_versions)
       })
     }
 
@@ -419,27 +416,33 @@ function App() {
 
   if (adminOpen) {
     if (!adminLoggedIn) {
-      return <AdminLogin
-      onLogin={handleLogin}
-      onExit={() => setAdminOpen(false)}
-      brandLogoUrl={siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'}
-    />
+      return (
+        <Suspense fallback={<div style={{ minHeight: '100vh', background: '#080c14' }} />}>
+          <AdminLogin
+            onLogin={handleLogin}
+            onExit={() => setAdminOpen(false)}
+            brandLogoUrl={siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'}
+          />
+        </Suspense>
+      )
     }
     return (
-      <AdminDashboard
-        user={currentUser}
-        onExit={handleLogout}
-        active={activeAdmin}
-        setActive={setActiveAdmin}
-        featuresList={featuresList}
-        setFeaturesList={setFeaturesList}
-        newsList={newsList}
-        setNewsList={setNewsList}
-        apkVersions={apkVersions}
-        setApkVersions={setApkVersions}
-        siteSettings={siteSettings}
-        setSiteSettings={setSiteSettings}
-      />
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: '#080c14' }} />}>
+        <AdminDashboard
+          user={currentUser}
+          onExit={handleLogout}
+          active={activeAdmin}
+          setActive={setActiveAdmin}
+          featuresList={featuresList}
+          setFeaturesList={setFeaturesList}
+          newsList={newsList}
+          setNewsList={setNewsList}
+          apkVersions={apkVersions}
+          setApkVersions={setApkVersions}
+          siteSettings={siteSettings}
+          setSiteSettings={setSiteSettings}
+        />
+      </Suspense>
     )
   }
 
@@ -475,14 +478,16 @@ function App() {
         onOpenCookiePolicy={() => setActiveModal('cookie')}
       />
 
-      {/* Interactive Modals */}
-      {activeModal === 'privacy' && <PrivacyPolicyModal onClose={() => setActiveModal(null)} />}
-      {activeModal === 'help' && <HelpCenterModal onClose={() => setActiveModal(null)} />}
-      {activeModal === 'about' && <AboutModal onClose={() => setActiveModal(null)} />}
-      {activeModal === 'terms' && <TermsOfServiceModal onClose={() => setActiveModal(null)} />}
-      {activeModal === 'disclaimer' && <DisclaimerModal onClose={() => setActiveModal(null)} />}
-      {activeModal === 'cookie' && <CookiePolicyModal onClose={() => setActiveModal(null)} />}
-      {selectedArticle && <ArticleReaderModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+      {/* Interactive Modals (Lazy Loaded) */}
+      <Suspense fallback={null}>
+        {activeModal === 'privacy' && <PrivacyPolicyModal onClose={() => setActiveModal(null)} />}
+        {activeModal === 'help' && <HelpCenterModal onClose={() => setActiveModal(null)} />}
+        {activeModal === 'about' && <AboutModal onClose={() => setActiveModal(null)} />}
+        {activeModal === 'terms' && <TermsOfServiceModal onClose={() => setActiveModal(null)} />}
+        {activeModal === 'disclaimer' && <DisclaimerModal onClose={() => setActiveModal(null)} />}
+        {activeModal === 'cookie' && <CookiePolicyModal onClose={() => setActiveModal(null)} />}
+        {selectedArticle && <ArticleReaderModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+      </Suspense>
     </div>
   )
 }

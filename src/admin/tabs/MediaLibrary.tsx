@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
-import { deleteImageByUrl, uploadImage } from '../../supabase'
+import { deleteImageByUrl, uploadImage, type UploadStage } from '../../supabase'
+import { OptimizedImage } from '../../components/OptimizedImage'
 
 const MEDIA_LIBRARY_DEFS = [
   {
@@ -117,6 +118,8 @@ const categoryOptions = [
 export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: SiteSettings; onSave: (newSettings: SiteSettings) => void; onPublishAll?: (newSettings: SiteSettings) => Promise<string> }) {
   const [formData, setFormData] = useState<SiteSettings>(settings)
   const [statusMessage, setStatusMessage] = useState('')
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null)
+  const [uploadStage, setUploadStage] = useState<UploadStage | null>(null)
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [sortMode, setSortMode] = useState<'date' | 'name'>('date')
@@ -152,11 +155,27 @@ export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: Sit
     })
   }, [categoryFilter, entries, query, sortMode])
 
+  const STAGE_LABEL: Record<UploadStage, string> = {
+    validating: 'Validating image…',
+    optimizing: 'Optimizing & compressing…',
+    uploading: 'Uploading to storage…',
+    finalizing: 'Finalizing URL…',
+    done: 'Upload complete',
+  }
+
   const handleImageUpload = async (key: string, file: File) => {
-    setStatusMessage('Uploading image…')
-    const result = await uploadImage(file, 'media-library')
+    if (uploadingKey) return // prevent duplicate concurrent uploads
+    setUploadingKey(key)
+    setUploadStage('validating')
+    setStatusMessage('Validating image…')
+    const result = await uploadImage(file, 'media-library', (_pct, stage) => {
+      setUploadStage(stage)
+      setStatusMessage(STAGE_LABEL[stage])
+    })
     if ('error' in result) {
       setStatusMessage(`Upload failed: ${result.error}`)
+      setUploadingKey(null)
+      setUploadStage(null)
       return
     }
 
@@ -170,7 +189,7 @@ export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: Sit
       uploadDate: current?.uploadDate ?? new Date().toISOString(),
       updatedDate: new Date().toISOString(),
       active: true,
-      version: (current?.version ?? 0) + 1,
+      version: result.version,
     }
 
     const nextFormData: SiteSettings = {
@@ -183,6 +202,8 @@ export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: Sit
     setFormData(nextFormData)
 
     // AUTO-PUBLISH: upload hote hi image seedha live website par.
+    setUploadingKey(null)
+    setUploadStage(null)
     if (onPublishAll) {
       setStatusMessage('Image uploaded — publishing to live website…')
       const msg = await onPublishAll(nextFormData)
@@ -291,10 +312,15 @@ export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: Sit
           return (
             <div key={entry.key} className="media-card" style={{ background: 'rgba(10,16,20,0.68)', border: '1px solid var(--line)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ position: 'relative', height: '170px', overflow: 'hidden', borderBottom: '1px solid rgba(148,163,184,0.12)' }}>
-                <img
+                <OptimizedImage
                   src={entry.url}
+                  version={entry.current?.version}
                   alt={entry.label}
+                  loading="lazy"
+                  width={480}
+                  height={170}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  wrapperStyle={{ height: '100%' }}
                 />
                 <span style={{ position: 'absolute', left: '10px', top: '10px', borderRadius: '999px', padding: '5px 8px', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', background: isActive ? 'rgba(16,185,129,0.18)' : 'rgba(148,163,184,0.12)', color: isActive ? '#9ae6b4' : '#cbd5e1' }}>
                   {isActive ? 'Active' : 'Inactive'}
@@ -315,15 +341,21 @@ export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: Sit
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
-                  <label className="admin-action-btn" htmlFor={`${entry.key}-media-upload`} style={{ cursor: 'pointer', margin: 0 }}>
-                    Upload
+                  <label
+                    className="admin-action-btn"
+                    htmlFor={`${entry.key}-media-upload`}
+                    style={{ cursor: uploadingKey ? 'not-allowed' : 'pointer', margin: 0, opacity: uploadingKey ? 0.5 : 1, pointerEvents: uploadingKey ? 'none' : 'auto' }}
+                  >
+                    {uploadingKey === entry.key ? (uploadStage === 'optimizing' ? 'Optimizing…' : 'Uploading…') : 'Upload'}
                   </label>
                   <input
                     id={`${entry.key}-media-upload`}
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                    disabled={Boolean(uploadingKey)}
                     onChange={(e) => {
                       const file = e.target.files?.[0]
+                      e.target.value = '' // allow re-selecting the same file
                       if (file) handleImageUpload(entry.key, file)
                     }}
                     style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}

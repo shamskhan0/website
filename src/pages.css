@@ -67,14 +67,14 @@
 }
 
 .error-code {
-  font-size: 120px;
+  font-size: clamp(80px, 12vw, 120px);
   font-weight: 900;
-  background: linear-gradient(135deg, var(--emerald), var(--blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0 0 16px 0;
   line-height: 1;
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0 0 16px 0;
   letter-spacing: -4px;
 }
 
@@ -161,7 +161,7 @@
 
 .error-device-content {
   font-size: 80px;
-  animation: pulse 2s ease-in-out infinite;
+  animation: devicePulse 2s ease-in-out infinite;
 }
 
 .error-device-stand {
@@ -176,7 +176,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes pulse {
+@keyframes devicePulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.7; transform: scale(0.95); }
 }

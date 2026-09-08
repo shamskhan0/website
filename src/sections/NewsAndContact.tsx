@@ -1,5 +1,6 @@
 import AdBanner from '../AdBanner'
 import type { NewsItem, SiteSettings } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
 
 const AD_SLOT_NEWS = '1647148763'
 
@@ -27,11 +28,14 @@ export function NewsSection({
           <article className="featured-article-card">
             <div className="featured-visual">
               {featuredArticle.imageUrl && (
-                <img
+                <OptimizedImage
                   src={featuredArticle.imageUrl}
                   alt={featuredArticle.title}
                   className="featured-img"
                   loading="lazy"
+                  width={1200}
+                  height={600}
+                  wrapperStyle={{ height: '100%' }}
                 />
               )}
               <div className="featured-overlay"></div>
@@ -71,7 +75,15 @@ export function NewsSection({
             <article className="news-card" key={item.id}>
               <div className={`news-image ${item.color}`}>
                 {item.imageUrl && (
-                  <img src={item.imageUrl} alt={item.title} className="news-img-cover" loading="lazy" />
+                  <OptimizedImage
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="news-img-cover"
+                    loading="lazy"
+                    width={600}
+                    height={340}
+                    wrapperStyle={{ height: '100%' }}
+                  />
                 )}
                 <div className="news-image-overlay"></div>
                 <span>{item.tag}</span>

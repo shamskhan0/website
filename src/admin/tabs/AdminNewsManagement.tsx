@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FeatureItem, NewsItem } from '../../types'
-import { uploadImage } from '../../supabase'
+import { uploadImage, type UploadStage } from '../../supabase'
+import { OptimizedImage } from '../../components/OptimizedImage'
 
 export function AdminNewsManagement({
   featuresList,
@@ -18,6 +19,16 @@ export function AdminNewsManagement({
   onPublish?: () => Promise<string>
 }) {
   const [publishing, setPublishing] = useState(false)
+  const [uploading, setUploading] = useState<'feature' | 'news' | null>(null)
+  const [uploadStage, setUploadStage] = useState<UploadStage | null>(null)
+
+  const STAGE_LABEL: Record<UploadStage, string> = {
+    validating: 'Validating image…',
+    optimizing: 'Optimizing & compressing…',
+    uploading: 'Uploading to storage…',
+    finalizing: 'Finalizing URL…',
+    done: 'Upload complete',
+  }
 
   const handlePublish = async () => {
     if (!onPublish) {
@@ -101,20 +112,29 @@ export function AdminNewsManagement({
 
   const handleFeatureImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    e.target.value = ''
+    if (!file || uploading) return
 
     if (!file.type.startsWith('image/')) {
       showToast('Please upload a valid image file.')
       return
     }
 
-    const result = await uploadImage(file, 'features')
+    setUploading('feature')
+    setUploadStage('validating')
+    showToast(STAGE_LABEL.validating)
+    const result = await uploadImage(file, 'features', (_pct, stage) => {
+      setUploadStage(stage)
+      showToast(STAGE_LABEL[stage])
+    })
+    setUploading(null)
+    setUploadStage(null)
     if ('error' in result) {
       showToast(`Upload failed: ${result.error}`)
       return
     }
     setFeatureImage(result.url)
-    showToast('Feature image uploaded to Supabase Storage. Press "Add / Update Feature" to publish it.')
+    showToast('Image optimized and uploaded. Press "Add / Update Feature" to publish it.')
   }
 
   const handleAddNews = (e: React.FormEvent) => {
@@ -190,20 +210,29 @@ export function AdminNewsManagement({
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    e.target.value = ''
+    if (!file || uploading) return
 
     if (!file.type.startsWith('image/')) {
       showToast('Please upload a valid image file.')
       return
     }
 
-    const result = await uploadImage(file, 'news')
+    setUploading('news')
+    setUploadStage('validating')
+    showToast(STAGE_LABEL.validating)
+    const result = await uploadImage(file, 'news', (_pct, stage) => {
+      setUploadStage(stage)
+      showToast(STAGE_LABEL[stage])
+    })
+    setUploading(null)
+    setUploadStage(null)
     if ('error' in result) {
       showToast(`Upload failed: ${result.error}`)
       return
     }
     setImageUrl(result.url)
-    showToast('Image uploaded to Supabase Storage. Press "Publish" to publish the article.')
+    showToast('Image optimized and uploaded. Press "Publish" to publish the article.')
   }
 
   const resetNewsForm = () => {
@@ -254,13 +283,14 @@ export function AdminNewsManagement({
             <div className="admin-form-group full-width">
               <label>Feature Image</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <label className="admin-action-btn" htmlFor="feature-image-upload" style={{ cursor: 'pointer', margin: 0, width: 'fit-content' }}>
-                  Upload Picture
+                <label className="admin-action-btn" htmlFor="feature-image-upload" style={{ cursor: uploading ? 'not-allowed' : 'pointer', margin: 0, width: 'fit-content', opacity: uploading ? 0.5 : 1, pointerEvents: uploading ? 'none' : 'auto' }}>
+                  {uploading === 'feature' ? (uploadStage === 'optimizing' ? 'Optimizing…' : 'Uploading…') : 'Upload Picture'}
                 </label>
                 <input
                   id="feature-image-upload"
                   type="file"
-                  accept="image/*"
+                  accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                  disabled={Boolean(uploading)}
                   onChange={handleFeatureImageUpload}
                   aria-label="Upload feature image"
                   style={{
@@ -277,9 +307,12 @@ export function AdminNewsManagement({
                   }}
                 />
                 {featureImage && (
-                  <img
+                  <OptimizedImage
                     src={featureImage}
                     alt="Feature preview"
+                    loading="lazy"
+                    width={800}
+                    height={180}
                     style={{
                       width: '100%',
                       maxHeight: '180px',
@@ -288,6 +321,7 @@ export function AdminNewsManagement({
                       border: '1px solid rgba(148, 163, 184, 0.2)',
                       background: '#0b1220',
                     }}
+                    wrapperStyle={{ maxHeight: '180px' }}
                   />
                 )}
               </div>
@@ -328,7 +362,7 @@ export function AdminNewsManagement({
           {featuresList.map((item) => (
             <div className="admin-news-card" key={item.id}>
               {item.image && (
-                <img src={item.image} alt={item.title} className="admin-news-thumb" />
+                <OptimizedImage src={item.image} alt={item.title} className="admin-news-thumb" loading="lazy" width={200} height={140} wrapperStyle={{ flexShrink: 0 }} />
               )}
               <div className="admin-news-info" style={{ flex: 1 }}>
                 <div className="admin-news-meta">
@@ -404,13 +438,14 @@ export function AdminNewsManagement({
               <label>Cover Picture</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label className="admin-action-btn" htmlFor="news-cover-upload" style={{ cursor: 'pointer', margin: 0, width: 'fit-content' }}>
-                    Upload Image
+                  <label className="admin-action-btn" htmlFor="news-cover-upload" style={{ cursor: uploading ? 'not-allowed' : 'pointer', margin: 0, width: 'fit-content', opacity: uploading ? 0.5 : 1, pointerEvents: uploading ? 'none' : 'auto' }}>
+                    {uploading === 'news' ? (uploadStage === 'optimizing' ? 'Optimizing…' : 'Uploading…') : 'Upload Image'}
                   </label>
                   <input
                     id="news-cover-upload"
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                    disabled={Boolean(uploading)}
                     onChange={handleImageUpload}
                     style={{
                       width: '100%',
@@ -425,9 +460,12 @@ export function AdminNewsManagement({
                 </div>
 
                 {imageUrl && (
-                  <img
+                  <OptimizedImage
                     src={imageUrl}
                     alt="Selected cover preview"
+                    loading="lazy"
+                    width={800}
+                    height={170}
                     style={{
                       width: '100%',
                       maxHeight: '170px',
@@ -436,6 +474,7 @@ export function AdminNewsManagement({
                       border: '1px solid rgba(148, 163, 184, 0.2)',
                       background: '#0b1220',
                     }}
+                    wrapperStyle={{ maxHeight: '170px' }}
                   />
                 )}
 
@@ -500,7 +539,7 @@ export function AdminNewsManagement({
           {newsList.map((item) => (
             <div className="admin-news-card" key={item.id}>
               {item.imageUrl && (
-                <img src={item.imageUrl} alt={item.title} className="admin-news-thumb" />
+                <OptimizedImage src={item.imageUrl} alt={item.title} className="admin-news-thumb" loading="lazy" width={200} height={140} wrapperStyle={{ flexShrink: 0 }} />
               )}
               <div className="admin-news-info" style={{ flex: 1 }}>
                 <div className="admin-news-meta">

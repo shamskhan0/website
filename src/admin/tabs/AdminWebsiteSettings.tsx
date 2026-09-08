@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
-import { deleteImageByUrl, uploadImage } from '../../supabase'
+import { deleteImageByUrl, uploadImage, type UploadStage } from '../../supabase'
+import { OptimizedImage } from '../../components/OptimizedImage'
 
 const IMAGE_CONFIG = [
   {
@@ -55,6 +56,16 @@ export function AdminWebsiteSettings({
   }
 
   const [publishing, setPublishing] = useState(false)
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null)
+  const [uploadStage, setUploadStage] = useState<UploadStage | null>(null)
+
+  const STAGE_LABEL: Record<UploadStage, string> = {
+    validating: 'Validating image…',
+    optimizing: 'Optimizing & compressing…',
+    uploading: 'Uploading to storage…',
+    finalizing: 'Finalizing URL…',
+    done: 'Upload complete',
+  }
 
   const handlePublishAll = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,8 +82,16 @@ export function AdminWebsiteSettings({
   }
 
   const handleImageUpload = async (key: string, file: File) => {
-    setStatusMessage('Uploading image…')
-    const result = await uploadImage(file, 'website-settings')
+    if (uploadingKey) return // prevent duplicate concurrent uploads
+    setUploadingKey(key)
+    setUploadStage('validating')
+    setStatusMessage(STAGE_LABEL.validating)
+    const result = await uploadImage(file, 'website-settings', (_pct, stage) => {
+      setUploadStage(stage)
+      setStatusMessage(STAGE_LABEL[stage])
+    })
+    setUploadingKey(null)
+    setUploadStage(null)
 
     if ('error' in result) {
       setStatusMessage(`Upload failed: ${result.error}`)
@@ -270,15 +289,17 @@ export function AdminWebsiteSettings({
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
-                      <label className="admin-action-btn" htmlFor={`${imageConfig.key}-upload`} style={{ cursor: 'pointer', margin: 0 }}>
-                        Upload Image
+                      <label className="admin-action-btn" htmlFor={`${imageConfig.key}-upload`} style={{ cursor: uploadingKey ? 'not-allowed' : 'pointer', margin: 0, opacity: uploadingKey ? 0.5 : 1, pointerEvents: uploadingKey ? 'none' : 'auto' }}>
+                        {uploadingKey === imageConfig.key ? (uploadStage === 'optimizing' ? 'Optimizing…' : 'Uploading…') : 'Upload Image'}
                       </label>
                       <input
                         id={`${imageConfig.key}-upload`}
                         type="file"
-                        accept="image/*"
+                        accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+                        disabled={Boolean(uploadingKey)}
                         onChange={(e) => {
                           const file = e.target.files?.[0]
+                          e.target.value = '' // allow re-selecting the same file
                           if (file) handleImageUpload(imageConfig.key, file)
                         }}
                         style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}
@@ -289,10 +310,15 @@ export function AdminWebsiteSettings({
                     </div>
 
                     {activeUrl && (
-                      <img
+                      <OptimizedImage
                         src={activeUrl}
+                        version={currentImage?.version}
                         alt={imageConfig.label}
+                        loading="lazy"
+                        width={800}
+                        height={180}
                         style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '12px', border: '1px solid rgba(148, 163, 184, 0.2)', marginBottom: '10px' }}
+                        wrapperStyle={{ maxHeight: '180px', marginBottom: '10px' }}
                       />
                     )}
 
