@@ -28,7 +28,7 @@ import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
 import { OptimizedImage } from './components/OptimizedImage'
 import { INITIAL_FEATURES, INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
 import { loadPersisted, usePersistedState } from './persistence'
-import { cloudSyncEnabled, fetchAllCloudBatch, pushCloudData, onSettingsChanged } from './cloudSync'
+import { cloudSyncEnabled, fetchAllCloudBatch, pushCloudData, onSettingsChanged, subscribeToCloudChanges } from './cloudSync'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
@@ -72,6 +72,29 @@ const isAdminUser = (v: unknown): v is AdminUser =>
   v !== null && typeof v === 'object' &&
   typeof (v as AdminUser).name === 'string' &&
   typeof (v as AdminUser).email === 'string'
+
+function DesktopViewport({ children }: { children: React.ReactNode }) {
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    const updateScale = () => {
+      const width = viewportRef.current?.clientWidth ?? window.innerWidth
+      setScale(Math.min(1, width / 1440))
+    }
+    updateScale()
+    window.addEventListener('resize', updateScale)
+    return () => window.removeEventListener('resize', updateScale)
+  }, [])
+
+  return (
+    <div className="desktop-viewport" ref={viewportRef}>
+      <div className="desktop-canvas" style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
 
 function TrustHighlightsBar() {
   const items = [
@@ -250,12 +273,18 @@ function FaqSection() {
       </div>
       <div className="faq-list">
         {faqs.map((faq, index) => (
-          <div key={faq.q} className={`faq-item ${openFaq === index ? 'open' : ''}`} onClick={() => setOpenFaq(openFaq === index ? null : index)}>
-            <div className="faq-question">
+          <div key={faq.q} className={`faq-item ${openFaq === index ? 'open' : ''}`}>
+            <button
+              type="button"
+              className="faq-question"
+              aria-expanded={openFaq === index}
+              aria-controls={`faq-answer-${index}`}
+              onClick={() => setOpenFaq(openFaq === index ? null : index)}
+            >
               <span>{faq.q}</span>
-              <span>{openFaq === index ? '−' : '+'}</span>
-            </div>
-            {openFaq === index && <div className="faq-answer">{faq.a}</div>}
+              <span aria-hidden="true">{openFaq === index ? '−' : '+'}</span>
+            </button>
+            {openFaq === index && <div id={`faq-answer-${index}`} className="faq-answer">{faq.a}</div>}
           </div>
         ))}
       </div>
@@ -326,23 +355,28 @@ function App() {
       })
     }
 
-    // Admin panel doosri tab mein save kare to live site instantly update ho
-    const off = onSettingsChanged(() => {
-      try {
-        const saved = localStorage.getItem('rd_site_settings')
-        if (saved) {
-          const parsed: unknown = JSON.parse(saved)
-          if (isSiteSettings(parsed)) setSiteSettings(parsed)
-        }
-      } catch {
-        // ignore
-      }
-    })
+  const applyCloudContent = (batch: Awaited<ReturnType<typeof fetchAllCloudBatch>>) => {
+    if (batch.settings && isSiteSettings(batch.settings)) setSiteSettings(batch.settings)
+    if (batch.features && isFeatureList(batch.features)) setFeaturesList(batch.features)
+    if (batch.news && isNewsList(batch.news)) setNewsList(batch.news)
+    if (batch.apk_versions && isApkVersions(batch.apk_versions)) setApkVersions(batch.apk_versions)
+  }
 
-    return () => {
-      cancelled = true
-      off()
-    }
+  // Admin edits are shared through Supabase Realtime, with storage as a
+  // same-browser fallback. Every visitor receives the latest published data.
+  const refreshCloudContent = () => {
+    void fetchAllCloudBatch().then((batch) => {
+      if (!cancelled) applyCloudContent(batch)
+    })
+  }
+  const offStorage = onSettingsChanged(refreshCloudContent)
+  const offRealtime = subscribeToCloudChanges(refreshCloudContent)
+
+  return () => {
+    cancelled = true
+    offStorage()
+    offRealtime()
+  }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -447,8 +481,9 @@ function App() {
   }
 
   return (
-    <div className="site-shell">
-      <AnnouncementBar siteSettings={siteSettings} />
+    <DesktopViewport>
+      <div className="site-shell">
+        <AnnouncementBar siteSettings={siteSettings} />
 
       <SiteHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} onOpenAbout={() => setActiveModal('about')} siteSettings={siteSettings} />
 
@@ -487,8 +522,9 @@ function App() {
         {activeModal === 'disclaimer' && <DisclaimerModal onClose={() => setActiveModal(null)} />}
         {activeModal === 'cookie' && <CookiePolicyModal onClose={() => setActiveModal(null)} />}
         {selectedArticle && <ArticleReaderModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
-      </Suspense>
-    </div>
+        </Suspense>
+      </div>
+    </DesktopViewport>
   )
 }
 

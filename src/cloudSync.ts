@@ -11,14 +11,13 @@
  *   );
  *   alter table cloud_data enable row level security;
  *   create policy "read cloud_data" on cloud_data for select using (true);
- *   create policy "write cloud_data" on cloud_data for insert with check (true);
- *   create policy "update cloud_data" on cloud_data for update using (true) with check (true);
+ *   -- INSERT/UPDATE policies must target an authenticated admin role and
+ *   -- enforce authorization; never use `using (true)` for public writes.
  *
- * NOTE: the legacy `site_settings` table is no longer used. It was removed
- * because its RLS policies blocked anon INSERT/UPDATE (401 42501) which made
- * admin saves silently fail — images then only lived in one browser's
- * localStorage. `cloud_data` has working RLS policies (verified live) and is
- * the single source of truth.
+ * NOTE: the legacy `site_settings` table is no longer used. The `cloud_data`
+ * table must be protected with authenticated write policies in Supabase; this
+ * browser client intentionally uses only the publishable key and cannot bypass
+ * RLS. Public reads may be allowed, but unauthenticated writes are unsafe.
  *
  * If Supabase env vars are not configured, everything falls back to
  * localStorage-only mode (old behaviour) and nothing breaks.
@@ -60,6 +59,7 @@ export async function pushCloudSettings(settings: unknown): Promise<boolean> {
       console.error('pushCloudSettings:', error.message);
       return false;
     }
+    queryCache.clear()
     return true;
   } catch {
     return false;
@@ -102,35 +102,39 @@ export async function fetchAllCloudBatch(): Promise<{
   }
 
   const promise = (async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cloud_data')
-        .select('key, value')
-        .in('key', ['site_settings', 'features', 'news', 'apk_versions'])
+    const empty = { settings: null, features: null, news: null, apk_versions: null }
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const { data, error } = await supabase
+          .from('cloud_data')
+          .select('key, value')
+          .in('key', ['site_settings', 'features', 'news', 'apk_versions'])
 
-      if (error || !data) {
+        if (!error && data) {
+          const map = new Map<string, unknown>()
+          for (const row of data) map.set(row.key, row.value)
+          return {
+            settings: map.get('site_settings') ?? null,
+            features: map.get('features') ?? null,
+            news: map.get('news') ?? null,
+            apk_versions: map.get('apk_versions') ?? null,
+          }
+        }
         if (error) console.error('fetchAllCloudBatch error:', error.message)
-        return { settings: null, features: null, news: null, apk_versions: null }
+      } catch (error) {
+        console.error('fetchAllCloudBatch exception:', error)
       }
-
-      const map = new Map<string, unknown>()
-      for (const row of data) {
-        map.set(row.key, row.value)
-      }
-
-      return {
-        settings: map.get('site_settings') ?? null,
-        features: map.get('features') ?? null,
-        news: map.get('news') ?? null,
-        apk_versions: map.get('apk_versions') ?? null,
-      }
-    } catch (e) {
-      console.error('fetchAllCloudBatch exception:', e)
-      return { settings: null, features: null, news: null, apk_versions: null }
+      if (attempt < 2) await new Promise((resolve) => window.setTimeout(resolve, 350 * (attempt + 1)))
     }
+    // Do not cache a failed read. A transient mobile/network failure must not
+    // hide a valid uploaded image for the next minute after a refresh.
+    return empty
   })()
 
   queryCache.set(cacheKey, { promise, timestamp: Date.now() })
+  void promise.then((result) => {
+    if (!result.settings && !result.features && !result.news && !result.apk_versions) queryCache.delete(cacheKey)
+  })
   return promise
 }
 
@@ -164,6 +168,7 @@ export async function pushCloudData(key: string, value: unknown): Promise<boolea
       console.error(`pushCloudData(${key}):`, error.message);
       return false;
     }
+    queryCache.clear()
     return true;
   } catch {
     return false;
@@ -177,8 +182,46 @@ export async function pushCloudData(key: string, value: unknown): Promise<boolea
  */
 export function onSettingsChanged(cb: () => void): () => void {
   const handler = (e: StorageEvent) => {
-    if (e.key === "rd_site_settings") cb();
-  };
-  window.addEventListener("storage", handler);
-  return () => window.removeEventListener("storage", handler);
+    if (e.key === 'rd_site_settings') cb()
+  }
+  window.addEventListener('storage', handler)
+  return () => window.removeEventListener('storage', handler)
+}
+
+/**
+ * Notify open visitor tabs whenever any shared content row changes. Realtime
+ * is the primary path; the visibility listener is a safe fallback for devices
+ * that sleep WebSocket connections while the page is backgrounded.
+ */
+export function subscribeToCloudChanges(cb: () => void): () => void {
+  if (!supabase) return () => undefined
+
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined
+  const scheduleRefresh = () => {
+    if (refreshTimer) clearTimeout(refreshTimer)
+    refreshTimer = setTimeout(() => {
+      queryCache.clear()
+      cb()
+    }, 150)
+  }
+
+  const channel = supabase
+    .channel('public:cloud_data:site-content')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'cloud_data',
+    }, scheduleRefresh)
+    .subscribe()
+
+  const onVisible = () => {
+    if (document.visibilityState === 'visible') scheduleRefresh()
+  }
+  document.addEventListener('visibilitychange', onVisible)
+
+  return () => {
+    if (refreshTimer) clearTimeout(refreshTimer)
+    document.removeEventListener('visibilitychange', onVisible)
+    void supabase?.removeChannel(channel)
+  }
 }
