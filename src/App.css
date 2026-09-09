@@ -49,6 +49,8 @@ em {
   min-height: 100vh;
   overflow: hidden;
   scroll-behavior: smooth;
+  /* Subpixel rounding gap na dikhe — site ka background hi viewport ka bg */
+  background: linear-gradient(180deg, #050807 0%, #071010 32%, #050807 100%);
 }
 
 .desktop-canvas {

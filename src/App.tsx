@@ -83,7 +83,10 @@ function DesktopViewport({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const updateScale = () => {
       const width = viewportRef.current?.clientWidth ?? window.innerWidth
-      setScale(Math.min(1, width / 1440))
+      // Hamesha poori screen width fill karo — desktop par 1440 se badi
+      // screens par bhi canvas stretch hoga (side ki khali jagah khatam),
+      // mobile par bhi exact edge-to-edge fit.
+      setScale(width / 1440)
     }
     updateScale()
     window.addEventListener('resize', updateScale, { passive: true })
@@ -117,7 +120,7 @@ function DesktopViewport({ children }: { children: React.ReactNode }) {
     <div
       className="desktop-viewport"
       ref={viewportRef}
-      style={canvasHeight !== null && scale < 1 ? { height: canvasHeight } : undefined}
+      style={canvasHeight !== null ? { height: canvasHeight } : undefined}
     >
       <div className="desktop-canvas" style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }} ref={canvasRef}>
         {children}
