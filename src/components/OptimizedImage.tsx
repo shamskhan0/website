@@ -91,10 +91,13 @@ export function OptimizedImage({
 
   const handleError = () => {
     if (retriesCount < retries && url) {
-      setRetriesCount((prev) => prev + 1)
-      const attemptSrc = `${url}${url.includes('?') ? '&' : '?'}retry=${Date.now()}`
+      const nextAttempt = retriesCount + 1
+      setRetriesCount(nextAttempt)
+      const attemptSrc = `${url}${url.includes('?') ? '&' : '?'}retry=${nextAttempt}-${Date.now()}`
       setStatus('loading')
-      window.setTimeout(() => setCurrentSrc(attemptSrc), 1000)
+      // Retry quickly for transient mobile/CDN failures, but keep the retry
+      // count bounded so a permanently unavailable asset never loops forever.
+      window.setTimeout(() => setCurrentSrc(attemptSrc), 350 * nextAttempt)
     } else if (fallbackSrc) {
       setStatus('ok')
       setCurrentSrc(fallbackSrc)

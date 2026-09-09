@@ -102,35 +102,39 @@ export async function fetchAllCloudBatch(): Promise<{
   }
 
   const promise = (async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cloud_data')
-        .select('key, value')
-        .in('key', ['site_settings', 'features', 'news', 'apk_versions'])
+    const empty = { settings: null, features: null, news: null, apk_versions: null }
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const { data, error } = await supabase
+          .from('cloud_data')
+          .select('key, value')
+          .in('key', ['site_settings', 'features', 'news', 'apk_versions'])
 
-      if (error || !data) {
+        if (!error && data) {
+          const map = new Map<string, unknown>()
+          for (const row of data) map.set(row.key, row.value)
+          return {
+            settings: map.get('site_settings') ?? null,
+            features: map.get('features') ?? null,
+            news: map.get('news') ?? null,
+            apk_versions: map.get('apk_versions') ?? null,
+          }
+        }
         if (error) console.error('fetchAllCloudBatch error:', error.message)
-        return { settings: null, features: null, news: null, apk_versions: null }
+      } catch (error) {
+        console.error('fetchAllCloudBatch exception:', error)
       }
-
-      const map = new Map<string, unknown>()
-      for (const row of data) {
-        map.set(row.key, row.value)
-      }
-
-      return {
-        settings: map.get('site_settings') ?? null,
-        features: map.get('features') ?? null,
-        news: map.get('news') ?? null,
-        apk_versions: map.get('apk_versions') ?? null,
-      }
-    } catch (e) {
-      console.error('fetchAllCloudBatch exception:', e)
-      return { settings: null, features: null, news: null, apk_versions: null }
+      if (attempt < 2) await new Promise((resolve) => window.setTimeout(resolve, 350 * (attempt + 1)))
     }
+    // Do not cache a failed read. A transient mobile/network failure must not
+    // hide a valid uploaded image for the next minute after a refresh.
+    return empty
   })()
 
   queryCache.set(cacheKey, { promise, timestamp: Date.now() })
+  void promise.then((result) => {
+    if (!result.settings && !result.features && !result.news && !result.apk_versions) queryCache.delete(cacheKey)
+  })
   return promise
 }
 
