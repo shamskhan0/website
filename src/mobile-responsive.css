@@ -247,6 +247,64 @@ html {
   }
 }
 
+/* ---------- Desktop/Mobile view toggle (touch devices) ---------- */
+.view-mode-toggle {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9000;
+  display: none;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(8, 15, 13, 0.85);
+  backdrop-filter: blur(8px);
+  color: #d7f5ea;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.view-mode-toggle:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+}
+
+.view-mode-toggle.active {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.7);
+  color: #7ff0c8;
+}
+
+@media (hover: none) and (pointer: coarse), (max-width: 900px) {
+  .view-mode-toggle {
+    display: inline-flex;
+  }
+
+  /* Force-desktop mode: real 1440px layout, browser horizontal scroll ke saath */
+  .desktop-viewport.force-desktop {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .desktop-viewport.force-desktop .desktop-canvas {
+    transform: none;
+  }
+}
+
+@media (min-width: 901px) and (hover: hover) and (pointer: fine) {
+  .desktop-viewport.force-desktop {
+    overflow-x: auto;
+  }
+  .desktop-viewport.force-desktop .desktop-canvas {
+    transform: none;
+  }
+}
+
 /* ---------- Flat float animation for mobile phone frame ---------- */
 @keyframes floatPhoneFlat {
   0%,

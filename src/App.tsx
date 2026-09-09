@@ -74,7 +74,7 @@ const isAdminUser = (v: unknown): v is AdminUser =>
   typeof (v as AdminUser).name === 'string' &&
   typeof (v as AdminUser).email === 'string'
 
-function DesktopViewport({ children }: { children: React.ReactNode }) {
+function DesktopViewport({ children, forceDesktop }: { children: React.ReactNode; forceDesktop: boolean }) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
@@ -82,10 +82,14 @@ function DesktopViewport({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const updateScale = () => {
+      // "Desktop view" mode: hamesha real 1440px desktop layout (mobile par
+      // browser zoom/horizontal scroll ke saath — bilkul waise jaise desktop
+      // browser mein dikhti hai). Warna screen ke hisaab se exact fit.
+      if (forceDesktop) {
+        setScale(1)
+        return
+      }
       const width = viewportRef.current?.clientWidth ?? window.innerWidth
-      // Hamesha poori screen width fill karo — desktop par 1440 se badi
-      // screens par bhi canvas stretch hoga (side ki khali jagah khatam),
-      // mobile par bhi exact edge-to-edge fit.
       setScale(width / 1440)
     }
     updateScale()
@@ -95,7 +99,7 @@ function DesktopViewport({ children }: { children: React.ReactNode }) {
       window.removeEventListener('resize', updateScale)
       window.removeEventListener('orientationchange', updateScale)
     }
-  }, [])
+  }, [forceDesktop])
 
   // transform: scale() layout height change nahi karta — canvas ki asli
   // (unscaled) height layout mein rehti hai, jis se mobile par neeche bohot
@@ -118,9 +122,9 @@ function DesktopViewport({ children }: { children: React.ReactNode }) {
 
   return (
     <div
-      className="desktop-viewport"
+      className={`desktop-viewport ${forceDesktop ? 'force-desktop' : ''}`}
       ref={viewportRef}
-      style={canvasHeight !== null ? { height: canvasHeight } : undefined}
+      style={canvasHeight !== null && !forceDesktop ? { height: canvasHeight } : undefined}
     >
       <div className="desktop-canvas" style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }} ref={canvasRef}>
         {children}
@@ -352,6 +356,27 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
+
+  // Mobile par "Desktop view" toggle — browser ke "Desktop site" jaisa.
+  // Choice save hoti hai taake agla page khulne par bhi yaad rahe.
+  const [forceDesktop, setForceDesktop] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('rd_desktop_view') === '1'
+    } catch {
+      return false
+    }
+  })
+  const toggleDesktopView = () => {
+    setForceDesktop((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem('rd_desktop_view', next ? '1' : '0')
+      } catch {
+        // ignore
+      }
+      return next
+    })
+  }
   const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | 'disclaimer' | 'cookie' | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
@@ -507,7 +532,19 @@ function App() {
   }
 
   return (
-    <DesktopViewport>
+    <>
+      {/* Desktop/Mobile view toggle — sirf touch devices par dikhata hai */}
+      <button
+        type="button"
+        className={`view-mode-toggle ${forceDesktop ? 'active' : ''}`}
+        onClick={toggleDesktopView}
+        aria-pressed={forceDesktop}
+        title={forceDesktop ? 'Switch to mobile view' : 'Switch to desktop view'}
+      >
+        <span aria-hidden="true">🖥</span>
+        {forceDesktop ? 'Mobile View' : 'Desktop View'}
+      </button>
+      <DesktopViewport forceDesktop={forceDesktop}>
       <div className="site-shell">
         <AnnouncementBar siteSettings={siteSettings} />
 
@@ -560,6 +597,7 @@ function App() {
         </Suspense>
       </div>
     </DesktopViewport>
+    </>
   )
 }
 
