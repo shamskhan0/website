@@ -28,7 +28,7 @@ import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
 import { OptimizedImage } from './components/OptimizedImage'
 import { INITIAL_FEATURES, INITIAL_NEWS, INITIAL_APK_VERSIONS, INITIAL_SITE_SETTINGS } from './data'
 import { loadPersisted, usePersistedState } from './persistence'
-import { cloudSyncEnabled, fetchAllCloudBatch, pushCloudData, onSettingsChanged } from './cloudSync'
+import { cloudSyncEnabled, fetchAllCloudBatch, pushCloudData, onSettingsChanged, subscribeToCloudChanges } from './cloudSync'
 
 // Shape validators — reject anything malformed so JSON.parse output is never
 // trusted blindly (corrupt/tampered localStorage falls back to defaults).
@@ -332,23 +332,28 @@ function App() {
       })
     }
 
-    // Admin panel doosri tab mein save kare to live site instantly update ho
-    const off = onSettingsChanged(() => {
-      try {
-        const saved = localStorage.getItem('rd_site_settings')
-        if (saved) {
-          const parsed: unknown = JSON.parse(saved)
-          if (isSiteSettings(parsed)) setSiteSettings(parsed)
-        }
-      } catch {
-        // ignore
-      }
-    })
+  const applyCloudContent = (batch: Awaited<ReturnType<typeof fetchAllCloudBatch>>) => {
+    if (batch.settings && isSiteSettings(batch.settings)) setSiteSettings(batch.settings)
+    if (batch.features && isFeatureList(batch.features)) setFeaturesList(batch.features)
+    if (batch.news && isNewsList(batch.news)) setNewsList(batch.news)
+    if (batch.apk_versions && isApkVersions(batch.apk_versions)) setApkVersions(batch.apk_versions)
+  }
 
-    return () => {
-      cancelled = true
-      off()
-    }
+  // Admin edits are shared through Supabase Realtime, with storage as a
+  // same-browser fallback. Every visitor receives the latest published data.
+  const refreshCloudContent = () => {
+    void fetchAllCloudBatch().then((batch) => {
+      if (!cancelled) applyCloudContent(batch)
+    })
+  }
+  const offStorage = onSettingsChanged(refreshCloudContent)
+  const offRealtime = subscribeToCloudChanges(refreshCloudContent)
+
+  return () => {
+    cancelled = true
+    offStorage()
+    offRealtime()
+  }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

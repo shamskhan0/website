@@ -291,8 +291,22 @@ body {
   .news-grid {
     gap: 18px;
   }
-  .news-image {
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+  .news-card,
+  .feature-card,
+  .why-card,
+  .stats-card,
+  .step-card {
+    min-width: 0;
+    width: 100%;
+  }
+  .news-image,
+  .feature-image {
+    width: 100%;
     height: 180px;
+    object-fit: cover;
   }
   .news-content {
     padding: 20px 18px;

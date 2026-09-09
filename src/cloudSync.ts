@@ -178,8 +178,46 @@ export async function pushCloudData(key: string, value: unknown): Promise<boolea
  */
 export function onSettingsChanged(cb: () => void): () => void {
   const handler = (e: StorageEvent) => {
-    if (e.key === "rd_site_settings") cb();
-  };
-  window.addEventListener("storage", handler);
-  return () => window.removeEventListener("storage", handler);
+    if (e.key === 'rd_site_settings') cb()
+  }
+  window.addEventListener('storage', handler)
+  return () => window.removeEventListener('storage', handler)
+}
+
+/**
+ * Notify open visitor tabs whenever any shared content row changes. Realtime
+ * is the primary path; the visibility listener is a safe fallback for devices
+ * that sleep WebSocket connections while the page is backgrounded.
+ */
+export function subscribeToCloudChanges(cb: () => void): () => void {
+  if (!supabase) return () => undefined
+
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined
+  const scheduleRefresh = () => {
+    if (refreshTimer) clearTimeout(refreshTimer)
+    refreshTimer = setTimeout(() => {
+      queryCache.clear()
+      cb()
+    }, 150)
+  }
+
+  const channel = supabase
+    .channel('public:cloud_data:site-content')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'cloud_data',
+    }, scheduleRefresh)
+    .subscribe()
+
+  const onVisible = () => {
+    if (document.visibilityState === 'visible') scheduleRefresh()
+  }
+  document.addEventListener('visibilitychange', onVisible)
+
+  return () => {
+    if (refreshTimer) clearTimeout(refreshTimer)
+    document.removeEventListener('visibilitychange', onVisible)
+    void supabase?.removeChannel(channel)
+  }
 }
