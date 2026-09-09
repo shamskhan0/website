@@ -285,7 +285,7 @@ function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSetting
             download
             onClick={(e) => {
               e.preventDefault()
-              void downloadApkFile(liveApk.downloadUrl)
+              void downloadApkFile(liveApk.downloadUrl, undefined, `roshan-digital-v${liveApk.version}.apk`)
             }}
           >Download App <span>↓</span></a>
         </div>

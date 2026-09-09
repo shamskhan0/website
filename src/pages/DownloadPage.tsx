@@ -13,7 +13,7 @@ export function DownloadAppPage({
   const [dlStatus, setDlStatus] = useState('')
   const handleApkDownload = () => {
     setDlStatus('APK download ho rahi hai…')
-    void downloadApkFile(liveApk.downloadUrl, setDlStatus)
+    void downloadApkFile(liveApk.downloadUrl, setDlStatus, `roshan-digital-v${liveApk.version}.apk`)
   }
   return (
     <div className="download-page">

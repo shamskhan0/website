@@ -29,7 +29,7 @@ export function ArticleReaderModal({
         <div className="modal-body" style={{ maxHeight: '70vh' }}>
           {article.imageUrl && (
             <div style={{ borderRadius: '12px', overflow: 'hidden', height: '260px', marginBottom: '20px', position: 'relative' }}>
-              <OptimizedImage src={article.imageUrl} alt={article.title} loading="eager" width={1200} height={600} style={{ width: '100%', height: '100%', objectFit: 'cover' }} wrapperStyle={{ height: '100%' }} />
+              <OptimizedImage src={article.imageUrl} alt={article.title} loading="eager" width={1200} height={600} style={{ width: '100%', height: '100%', objectFit: 'cover' }} wrapperStyle={{ position: 'absolute', inset: 0 }} />
             </div>
           )}
           <h2 style={{ fontSize: '24px', color: '#fff', margin: '0 0 16px 0', lineHeight: 1.3 }}>

@@ -151,7 +151,7 @@ export function AdminApkManagement({
             download
             onClick={(e) => {
               e.preventDefault()
-              void downloadApkFile(liveApk.downloadUrl, showToast)
+              void downloadApkFile(liveApk.downloadUrl, showToast, `roshan-digital-v${liveApk.version}.apk`)
             }}
             className="admin-action-btn"
           >

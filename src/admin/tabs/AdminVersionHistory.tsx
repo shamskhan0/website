@@ -124,7 +124,7 @@ export function AdminVersionHistory({
                     download
                     onClick={(e) => {
                       e.preventDefault()
-                      void downloadApkFile(item.downloadUrl, showToast)
+                      void downloadApkFile(item.downloadUrl, showToast, `roshan-digital-v${item.version}.apk`)
                     }}
                     className="admin-action-btn"
                   >

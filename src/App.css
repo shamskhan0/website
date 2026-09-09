@@ -132,7 +132,7 @@ em {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1240px;
+  max-width: 1450px;
   padding: 0 40px;
   margin: auto;
   backdrop-filter: blur(22px);
@@ -231,7 +231,7 @@ em {
 }
 
 .hero-section {
-  max-width: 1240px;
+  max-width: 1450px;
   margin: auto;
   padding: 80px 40px 100px;
   display: grid;
@@ -806,7 +806,7 @@ em {
 .trust-strip {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  max-width: 1160px;
+  max-width: 1450px;
   margin: auto;
   padding: 24px 20px;
   display: flex;
@@ -838,7 +838,7 @@ em {
 }
 
 .section {
-  max-width: 1160px;
+  max-width: 1450px;
   margin: auto;
   padding: 120px 20px;
   position: relative;
@@ -850,7 +850,7 @@ em {
 }
 
 .trust-highlights-bar {
-  max-width: 1160px;
+  max-width: 1450px;
   margin: 0 auto 10px;
   padding: 0 20px;
   display: grid;
@@ -1096,7 +1096,7 @@ em {
   grid-template-columns: 1.05fr 0.95fr;
   align-items: center;
   gap: 26px;
-  max-width: 1160px;
+  max-width: 1450px;
   margin: 0 auto;
   padding: 120px 20px 90px;
 }
@@ -1219,7 +1219,7 @@ em {
 }
 
 .final-cta-section {
-  max-width: 1160px;
+  max-width: 1450px;
   margin: 0 auto 100px;
   padding: 70px 20px 20px;
   display: grid;
@@ -1702,7 +1702,7 @@ em {
   pointer-events: none;
 }
 
-.news-image span {
+.news-image .news-tag {
   position: relative;
   z-index: 2;
   font-size: 10px;
@@ -1953,7 +1953,7 @@ em {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1160px;
+  max-width: 1450px;
   margin: 40px auto 100px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(16px);

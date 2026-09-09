@@ -14,15 +14,34 @@
 export async function downloadApkFile(
   url: string,
   showToast?: (msg: string) => void,
+  filenameHint?: string,
 ): Promise<void> {
-  const fallbackName = 'roshan-digital-app.apk'
+  const fallbackName = filenameHint || 'roshan-digital-app.apk'
 
   if (!url || url === '/roshan-digital-v2.0.0.apk') {
     showToast?.('⚠️ APK abhi tak upload nahi hui. Admin panel → APK Management se APK upload karein.')
     return
   }
 
+  const isSupabase = url.startsWith('http') && (url.includes('supabase.co') || url.includes('/storage/'))
+
   try {
+    // Supabase Storage: '?download=' query param server ko force-download +
+    // correct filename deta hai (cross-origin 'download' attribute ignore hota hai,
+    // is liye blob-download mobile par bhaari APK ke liye kharab tha).
+    if (isSupabase) {
+      const sep = url.includes('?') ? '&' : '?'
+      const a = document.createElement('a')
+      a.href = `${url}${sep}download=${encodeURIComponent(fallbackName)}`
+      a.download = fallbackName
+      a.rel = 'noopener noreferrer'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      showToast?.('✅ APK download shuru ho gayi!')
+      return
+    }
+
     const res = await fetch(url)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
@@ -43,20 +62,6 @@ export async function downloadApkFile(
       if (base.toLowerCase().endsWith('.apk')) filename = decodeURIComponent(base)
     } catch {
       // keep fallback
-    }
-
-    // Direct download for Supabase or external CDN to avoid in-memory memory bloat on mobile
-    if (url.startsWith('http') && (url.includes('supabase.co') || url.includes('/storage/'))) {
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      a.target = '_blank'
-      a.rel = 'noopener noreferrer'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      showToast?.('✅ APK download shuru ho gayi!')
-      return
     }
 
     const blobUrl = URL.createObjectURL(blob)

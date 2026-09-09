@@ -31,7 +31,7 @@ export function FeaturesSection({
                   loading="lazy"
                   width={800}
                   height={500}
-                  wrapperStyle={{ height: '100%' }}
+                  wrapperStyle={{ position: 'absolute', inset: 0 }}
                 />
                 <div className="feature-img-overlay"></div>
                 <span className="feature-number">0{index + 1}</span>
@@ -98,7 +98,7 @@ export function AppReleaseSection({
           download
           onClick={(e) => {
             e.preventDefault()
-            void downloadApkFile(liveApk.downloadUrl)
+            void downloadApkFile(liveApk.downloadUrl, undefined, `roshan-digital-v${liveApk.version}.apk`)
           }}
         >
           Download latest APK <span>↓</span>

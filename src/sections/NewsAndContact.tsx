@@ -35,7 +35,7 @@ export function NewsSection({
                   loading="lazy"
                   width={1200}
                   height={600}
-                  wrapperStyle={{ height: '100%' }}
+                  wrapperStyle={{ position: 'absolute', inset: 0 }}
                 />
               )}
               <div className="featured-overlay"></div>
@@ -82,11 +82,11 @@ export function NewsSection({
                     loading="lazy"
                     width={600}
                     height={340}
-                    wrapperStyle={{ height: '100%' }}
+                    wrapperStyle={{ position: 'absolute', inset: 0 }}
                   />
                 )}
                 <div className="news-image-overlay"></div>
-                <span>{item.tag}</span>
+                <span className="news-tag">{item.tag}</span>
               </div>
               <div className="news-content">
                 <time>{item.date}</time>
