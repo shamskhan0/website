@@ -1,11 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
-// PRODUCTION FIX: live Vercel deployment par purane/stale env vars kisi DOOSRE
-// Supabase project (rjptekdllfhvielxivnl) ko point kar rahe the — wahan 'media'
-// bucket nahi hai, is liye APK upload wahan fail hoti thi. Is liye verified-correct
-// project URL/publishable key ko pehle (hardcoded) rakha gaya hai aur env vars sirf
-// fallback hain. Ye PUBLIC anon key hai (RLS-protected, browser-safe), secret NAHI.
-const supabaseUrl = 'https://hkoorpktsjxahgifkkei.supabase.co'
-const supabaseAnonKey = 'sb_publishable_-LekehNVvLfIjCvieHV8Zg_c7-3nPRr'
+
+// Supabase configuration must come from the deployment environment. Never ship
+// a project URL or publishable key fallback in source control or the bundle.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
 
 export const supabaseEnabled = Boolean(supabaseUrl && supabaseAnonKey)
 
