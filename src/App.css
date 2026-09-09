@@ -1192,13 +1192,20 @@ em {
 }
 
 .faq-question {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  font: inherit;
   font-weight: 700;
   color: #fff;
   line-height: 1.5;
+  cursor: pointer;
 }
 
 .faq-question span:first-child {

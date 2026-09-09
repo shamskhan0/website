@@ -11,14 +11,13 @@
  *   );
  *   alter table cloud_data enable row level security;
  *   create policy "read cloud_data" on cloud_data for select using (true);
- *   create policy "write cloud_data" on cloud_data for insert with check (true);
- *   create policy "update cloud_data" on cloud_data for update using (true) with check (true);
+ *   -- INSERT/UPDATE policies must target an authenticated admin role and
+ *   -- enforce authorization; never use `using (true)` for public writes.
  *
- * NOTE: the legacy `site_settings` table is no longer used. It was removed
- * because its RLS policies blocked anon INSERT/UPDATE (401 42501) which made
- * admin saves silently fail — images then only lived in one browser's
- * localStorage. `cloud_data` has working RLS policies (verified live) and is
- * the single source of truth.
+ * NOTE: the legacy `site_settings` table is no longer used. The `cloud_data`
+ * table must be protected with authenticated write policies in Supabase; this
+ * browser client intentionally uses only the publishable key and cannot bypass
+ * RLS. Public reads may be allowed, but unauthenticated writes are unsafe.
  *
  * If Supabase env vars are not configured, everything falls back to
  * localStorage-only mode (old behaviour) and nothing breaks.
@@ -60,6 +59,7 @@ export async function pushCloudSettings(settings: unknown): Promise<boolean> {
       console.error('pushCloudSettings:', error.message);
       return false;
     }
+    queryCache.clear()
     return true;
   } catch {
     return false;
@@ -164,6 +164,7 @@ export async function pushCloudData(key: string, value: unknown): Promise<boolea
       console.error(`pushCloudData(${key}):`, error.message);
       return false;
     }
+    queryCache.clear()
     return true;
   } catch {
     return false;

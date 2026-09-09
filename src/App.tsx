@@ -250,12 +250,18 @@ function FaqSection() {
       </div>
       <div className="faq-list">
         {faqs.map((faq, index) => (
-          <div key={faq.q} className={`faq-item ${openFaq === index ? 'open' : ''}`} onClick={() => setOpenFaq(openFaq === index ? null : index)}>
-            <div className="faq-question">
+          <div key={faq.q} className={`faq-item ${openFaq === index ? 'open' : ''}`}>
+            <button
+              type="button"
+              className="faq-question"
+              aria-expanded={openFaq === index}
+              aria-controls={`faq-answer-${index}`}
+              onClick={() => setOpenFaq(openFaq === index ? null : index)}
+            >
               <span>{faq.q}</span>
-              <span>{openFaq === index ? '−' : '+'}</span>
-            </div>
-            {openFaq === index && <div className="faq-answer">{faq.a}</div>}
+              <span aria-hidden="true">{openFaq === index ? '−' : '+'}</span>
+            </button>
+            {openFaq === index && <div id={`faq-answer-${index}`} className="faq-answer">{faq.a}</div>}
           </div>
         ))}
       </div>
