@@ -139,6 +139,9 @@ function describeSupabaseError(error: { message?: string } | null | undefined): 
   if (msg.includes('duplicate')) {
     return 'A file with the same name already exists. Please retry the upload.'
   }
+  if (msg.includes('mime type') && msg.includes('not supported')) {
+    return `Storage bucket rejected this file type: ${raw}. Open Supabase Dashboard → Storage → media bucket → Settings and add this MIME type to "Allowed MIME types" (see FIX_MIME_TYPE.sql).`
+  }
   if (msg.includes('invalid') && msg.includes('jwt')) {
     return 'Authentication failed — check the Supabase project URL and publishable key.'
   }
