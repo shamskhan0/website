@@ -48,12 +48,14 @@ em {
   width: 100%;
   min-height: 100vh;
   overflow: hidden;
+  scroll-behavior: smooth;
 }
 
 .desktop-canvas {
   width: 1440px;
   min-height: 100vh;
-  will-change: transform;
+  transform: translateZ(0); /* GPU layer: smooth scaling & scrolling on mobile */
+  backface-visibility: hidden;
 }
 
 .site-shell {

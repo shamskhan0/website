@@ -15,6 +15,34 @@ body {
   overflow-x: clip;
 }
 
+/* Smooth, momentum scrolling on mobile webviews */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Animate/transition sirf GPU-friendly properties — smooth scrolling */
+.button,
+.card,
+.why-card,
+.step-card,
+.news-card,
+.faq-item {
+  transition: transform 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Tap targets min 44px on touch devices */
 @media (hover: none) and (pointer: coarse) {
   a.button,

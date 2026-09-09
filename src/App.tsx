@@ -76,7 +76,9 @@ const isAdminUser = (v: unknown): v is AdminUser =>
 
 function DesktopViewport({ children }: { children: React.ReactNode }) {
   const viewportRef = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
+  const [canvasHeight, setCanvasHeight] = useState<number | null>(null)
 
   useEffect(() => {
     const updateScale = () => {
@@ -84,13 +86,40 @@ function DesktopViewport({ children }: { children: React.ReactNode }) {
       setScale(Math.min(1, width / 1440))
     }
     updateScale()
-    window.addEventListener('resize', updateScale)
-    return () => window.removeEventListener('resize', updateScale)
+    window.addEventListener('resize', updateScale, { passive: true })
+    window.addEventListener('orientationchange', updateScale, { passive: true })
+    return () => {
+      window.removeEventListener('resize', updateScale)
+      window.removeEventListener('orientationchange', updateScale)
+    }
   }, [])
 
+  // transform: scale() layout height change nahi karta — canvas ki asli
+  // (unscaled) height layout mein rehti hai, jis se mobile par neeche bohot
+  // extra blank space aata tha. Viewport ko scaled height de kar fix hota hai.
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const viewport = viewportRef.current
+    if (!canvas || !viewport) return
+
+    const updateHeight = () => {
+      setCanvasHeight(canvas.offsetHeight * scale)
+    }
+    updateHeight()
+
+    // Images lazy-load / fonts / content changes par height badal sakti hai.
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(canvas)
+    return () => observer.disconnect()
+  }, [scale])
+
   return (
-    <div className="desktop-viewport" ref={viewportRef}>
-      <div className="desktop-canvas" style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+    <div
+      className="desktop-viewport"
+      ref={viewportRef}
+      style={canvasHeight !== null && scale < 1 ? { height: canvasHeight } : undefined}
+    >
+      <div className="desktop-canvas" style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }} ref={canvasRef}>
         {children}
       </div>
     </div>
