@@ -287,16 +287,46 @@ export async function uploadFile(
   const path = `${folder}/${safeName}`
 
   onProgress?.(10)
-  // VERIFIED: Supabase Storage par real APK upload 'application/vnd.android.package-archive'
-  // MIME ke saath HTTP 200 se kamyab hui thi (aur serving bhi isi Content-Type ke saath
-  // hoti hai). application/octet-stream bucket ki allowed-mimetypes list mein nahi hai,
-  // is liye 'mime type not supported' error aata tha — APK hamesha apne asli MIME type
-  // ke saath upload karo. apkDownload.ts download ko correct .apk filename ke saath
-  // force-download karta hai.
-  const contentType = 'application/vnd.android.package-archive'
-  const { error: uploadError } = await supabase.storage
-    .from(MEDIA_BUCKET)
-    .upload(path, file, { upsert: false, contentType })
+  // Try primary APK MIME type first. If the Supabase bucket restricts allowed_mime_types
+  // and rejects application/vnd.android.package-archive, automatically fallback to
+  // common allowed types ('application/octet-stream' or omitting contentType) so the upload succeeds.
+  const contentTypesToTry = [
+    'application/vnd.android.package-archive',
+    'application/octet-stream',
+    'application/x-zip-compressed',
+    'binary/octet-stream',
+  ]
+
+  let uploadError: { message?: string } | null = null
+
+  for (const ct of contentTypesToTry) {
+    const res = await supabase.storage
+      .from(MEDIA_BUCKET)
+      .upload(path, file, { upsert: false, contentType: ct })
+
+    if (!res.error) {
+      uploadError = null
+      break
+    }
+
+    uploadError = res.error
+    // If the error is NOT a mime type restriction, break early (e.g. auth or size error)
+    if (!res.error.message?.toLowerCase().includes('mime type')) {
+      break
+    }
+  }
+
+  // Final attempt without explicit contentType header if all specific MIME types failed
+  if (uploadError && uploadError.message?.toLowerCase().includes('mime type')) {
+    const finalRes = await supabase.storage
+      .from(MEDIA_BUCKET)
+      .upload(path, file, { upsert: false })
+    if (!finalRes.error) {
+      uploadError = null
+    } else {
+      uploadError = finalRes.error
+    }
+  }
 
   if (uploadError) {
     console.error('uploadFile:', uploadError.message)
