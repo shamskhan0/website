@@ -11,9 +11,16 @@ export function DownloadAppPage({
   siteSettings: SiteSettings
 }) {
   const [dlStatus, setDlStatus] = useState('')
+  const [dlFailed, setDlFailed] = useState(false)
+  const [dlBusy, setDlBusy] = useState(false)
   const handleApkDownload = () => {
+    setDlBusy(true)
+    setDlFailed(false)
     setDlStatus('APK download ho rahi hai…')
-    void downloadApkFile(liveApk.downloadUrl, setDlStatus, `roshan-digital-v${liveApk.version}.apk`)
+    void downloadApkFile(liveApk.downloadUrl, setDlStatus, `roshan-digital-v${liveApk.version}.apk`).then((result) => {
+      setDlBusy(false)
+      setDlFailed(!result.ok)
+    })
   }
   return (
     <div className="download-page">
@@ -71,11 +78,24 @@ export function DownloadAppPage({
                 handleApkDownload()
               }}
               className="button button-primary download-btn"
+              aria-busy={dlBusy}
             >
-              Download APK <span>↓</span>
+              {dlBusy ? 'Preparing…' : 'Download APK'} <span>↓</span>
             </a>
             {dlStatus && (
               <small className="download-note" style={{ display: 'block', marginTop: '6px' }}>{dlStatus}</small>
+            )}
+            {dlFailed && (
+              <div className="apk-download-retry" role="alert" style={{ marginTop: '8px' }}>
+                <button
+                  type="button"
+                  className="apk-retry-btn"
+                  onClick={handleApkDownload}
+                  disabled={dlBusy}
+                >
+                  ↻ Retry download
+                </button>
+              </div>
             )}
             <small className="download-note">Direct download to your device</small>
           </div>

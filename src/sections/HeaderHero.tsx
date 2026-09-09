@@ -13,11 +13,13 @@ export function SiteHeader({
   setMenuOpen,
   onOpenAbout,
   siteSettings,
+  onOpenSearch,
 }: {
   menuOpen: boolean
   setMenuOpen: (open: boolean) => void
   onOpenAbout: () => void
   siteSettings: SiteSettings
+  onOpenSearch?: () => void
 }) {
   const logoUrl = siteSettings.images?.app_logo?.url || '/roshan-digital-logo-transparent.png'
 
@@ -28,6 +30,9 @@ export function SiteHeader({
       </a>
       <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle navigation">
         {menuOpen ? '×' : '☰'}
+      </button>
+      <button className="search-toggle" onClick={() => onOpenSearch?.()} aria-label="Search the website" title="Search">
+        ⌕
       </button>
       <nav className={menuOpen ? 'open' : ''}>
         <a href="#top" onClick={() => setMenuOpen(false)}>Home</a>

@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
-import { downloadApkFile } from './apkDownload'
+import { ApkDownloadButton } from './components/ApkDownloadButton'
 import './App.css'
 import './brand.css'
 import './hero-theme.css'
@@ -23,6 +23,7 @@ const AboutModal = lazy(() => import('./modals').then(m => ({ default: m.AboutMo
 const TermsOfServiceModal = lazy(() => import('./modals').then(m => ({ default: m.TermsOfServiceModal })))
 const DisclaimerModal = lazy(() => import('./modals').then(m => ({ default: m.DisclaimerModal })))
 const CookiePolicyModal = lazy(() => import('./modals').then(m => ({ default: m.CookiePolicyModal })))
+const SearchModal = lazy(() => import('./SiteSearch').then(m => ({ default: m.SiteSearch })))
 
 import type { FeatureItem, NewsItem, ApkVersion, SiteSettings } from './types'
 import { OptimizedImage } from './components/OptimizedImage'
@@ -308,15 +309,7 @@ function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSetting
         <h2>Experience Roshan Digital</h2>
         <p>Discover a modern digital experience designed around simplicity and convenience.</p>
         <div className="hero-actions">
-          <a
-            className="button button-primary"
-            href={liveApk.downloadUrl}
-            download
-            onClick={(e) => {
-              e.preventDefault()
-              void downloadApkFile(liveApk.downloadUrl, undefined, `roshan-digital-v${liveApk.version}.apk`)
-            }}
-          >Download App <span>↓</span></a>
+          <ApkDownloadButton liveApk={liveApk} className="button button-primary" label="Download App" />
         </div>
       </div>
     </section>
@@ -325,6 +318,7 @@ function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSetting
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
   const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | 'disclaimer' | 'cookie' | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
@@ -485,7 +479,7 @@ function App() {
       <div className="site-shell">
         <AnnouncementBar siteSettings={siteSettings} />
 
-      <SiteHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} onOpenAbout={() => setActiveModal('about')} siteSettings={siteSettings} />
+      <SiteHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} onOpenAbout={() => setActiveModal('about')} siteSettings={siteSettings} onOpenSearch={() => setSearchOpen(true)} />
 
       <main id="top">
         <HeroSection siteSettings={siteSettings} liveApk={liveApk} />
@@ -522,6 +516,15 @@ function App() {
         {activeModal === 'disclaimer' && <DisclaimerModal onClose={() => setActiveModal(null)} />}
         {activeModal === 'cookie' && <CookiePolicyModal onClose={() => setActiveModal(null)} />}
         {selectedArticle && <ArticleReaderModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+        {searchOpen && (
+          <SearchModal
+            newsList={newsList}
+            featuresList={featuresList}
+            apkVersions={apkVersions}
+            onClose={() => setSearchOpen(false)}
+            onSelectArticle={setSelectedArticle}
+          />
+        )}
         </Suspense>
       </div>
     </DesktopViewport>

@@ -242,6 +242,192 @@ em {
   border-radius: 6px;
 }
 
+/* ── Website-wide search ─────────────────────────────────────────── */
+.search-toggle {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-size: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.search-toggle:hover {
+  border-color: var(--emerald);
+  color: var(--emerald);
+}
+
+.search-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 6, 5, 0.78);
+  backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: min(12vh, 120px) 16px 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+.search-window {
+  width: 100%;
+  max-width: 640px;
+  background: var(--card-bg);
+  border: 1px solid var(--line-light);
+  border-radius: 16px;
+  box-shadow: var(--shadow), var(--glow-emerald);
+  overflow: hidden;
+}
+
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.search-icon {
+  font-size: 20px;
+  color: var(--emerald);
+}
+
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-size: 16px;
+  min-width: 0;
+}
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.search-close {
+  flex-shrink: 0;
+}
+
+.search-results {
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.search-hint,
+.search-empty {
+  padding: 18px 14px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.search-empty b {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.search-hit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.search-hit:hover,
+.search-hit:focus-visible {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.25);
+}
+
+.search-hit-section {
+  font-size: 9.5px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--emerald);
+  font-weight: 800;
+}
+
+.search-hit-title {
+  font-size: 14.5px;
+  color: #fff;
+}
+
+.search-hit-snippet {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .search-backdrop {
+    padding: 10px 10px;
+    align-items: flex-start;
+  }
+  .search-window {
+    border-radius: 14px;
+  }
+  .search-input {
+    font-size: 16px; /* iOS zoom guard */
+  }
+  .search-results {
+    max-height: 60vh;
+  }
+}
+
+/* ── APK download retry UI ─────────────────────────────────────── */
+.apk-download-wrap {
+  display: inline-block;
+}
+.apk-download-retry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 10px;
+  font-size: 13px;
+  color: #fbbf24;
+  line-height: 1.5;
+}
+.apk-retry-btn {
+  border: 1px solid rgba(45, 212, 191, 0.5);
+  background: rgba(45, 212, 191, 0.12);
+  color: var(--emerald, #2dd4bf);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 40px; /* touch-friendly */
+  transition: background 0.2s ease;
+}
+.apk-retry-btn:hover:not(:disabled) {
+  background: rgba(45, 212, 191, 0.22);
+}
+.apk-retry-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .hero-section {
   max-width: 1450px;
   margin: auto;
