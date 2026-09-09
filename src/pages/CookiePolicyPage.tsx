@@ -43,16 +43,9 @@ export function CookiePolicyModal({ onClose }: { onClose: () => void }) {
             <li><strong>Improvement:</strong> To identify areas for website improvement</li>
           </ul>
 
-          <h4>Advertising Cookies</h4>
-          <ul>
-            <li><strong>Google AdSense:</strong> To deliver relevant advertisements based on your interests</li>
-            <li><strong>Remarketing:</strong> To show targeted ads on other websites you visit</li>
-            <li><strong>Ad Performance:</strong> To measure the effectiveness of advertising campaigns</li>
-          </ul>
-
           <h4>Third-Party Cookies</h4>
           <ul>
-            <li><strong>Google Services:</strong> Google Analytics, Google AdSense, Google Ad Manager</li>
+            <li><strong>Google Services:</strong> Google Analytics</li>
             <li><strong>Social Media:</strong> Social sharing buttons may set cookies</li>
             <li><strong>Content Delivery:</strong> CDN and other third-party services</li>
           </ul>
@@ -83,11 +76,6 @@ export function CookiePolicyModal({ onClose }: { onClose: () => void }) {
                 <td style={{ padding: '10px 0' }}>Up to 2 years</td>
                 <td style={{ padding: '10px 0' }}>Track usage patterns</td>
               </tr>
-              <tr>
-                <td style={{ padding: '10px 0' }}>Advertising Cookies</td>
-                <td style={{ padding: '10px 0' }}>Varies</td>
-                <td style={{ padding: '10px 0' }}>Deliver personalized ads</td>
-              </tr>
             </tbody>
           </table>
 
@@ -117,28 +105,10 @@ export function CookiePolicyModal({ onClose }: { onClose: () => void }) {
             .
           </p>
 
-          <h3>5. Google AdSense</h3>
+          <h3>5. Third-Party Cookies</h3>
           <p>
-            Roshan Digital uses Google AdSense to serve advertisements. Google may use cookies to
-            serve ads based on your prior visits to our website and other sites on the internet.
-          </p>
-          <p>
-            You can control your ad preferences and opt out of personalized advertising by visiting{' '}
-            <a
-              href="https://myaccount.google.com/ads"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: 'var(--emerald)' }}
-            >
-              Google Ad Settings
-            </a>
-            .
-          </p>
-
-          <h3>6. Third-Party Cookies</h3>
-          <p>
-            Third-party service providers (Google, analytics platforms, advertising networks) may set
-            their own cookies on your device. These are governed by their respective privacy policies,
+            Third-party service providers (such as analytics platforms) may set their own cookies on
+            your device. These are governed by their respective privacy policies,
             not by Roshan Digital.
           </p>
           <p>
@@ -156,20 +126,9 @@ export function CookiePolicyModal({ onClose }: { onClose: () => void }) {
                 Google Privacy Policy
               </a>
             </li>
-            <li>
-              <strong>Google AdSense:</strong>{' '}
-              <a
-                href="https://support.google.com/adsense"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'var(--emerald)' }}
-              >
-                AdSense Help Center
-              </a>
-            </li>
           </ul>
 
-          <h3>7. How to Control Cookies</h3>
+          <h3>6. How to Control Cookies</h3>
           <p>
             You can control and manage cookies in several ways:
           </p>
@@ -191,16 +150,6 @@ export function CookiePolicyModal({ onClose }: { onClose: () => void }) {
           <ul>
             <li>
               <a
-                href="https://myaccount.google.com/ads"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'var(--emerald)' }}
-              >
-                Opt out of Google personalized ads
-              </a>
-            </li>
-            <li>
-              <a
                 href="https://tools.google.com/dlpage/gaoptout"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -209,26 +158,16 @@ export function CookiePolicyModal({ onClose }: { onClose: () => void }) {
                 Install Google Analytics Opt-out Add-on
               </a>
             </li>
-            <li>
-              <a
-                href="http://optout.aboutads.info"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'var(--emerald)' }}
-              >
-                Digital Advertising Alliance Opt-out
-              </a>
-            </li>
           </ul>
 
-          <h3>8. Do Not Track</h3>
+          <h3>7. Do Not Track</h3>
           <p>
             Some browsers include a "Do Not Track" (DNT) feature. When enabled, your browser sends a
             signal to websites requesting that tracking be disabled. However, Roshan Digital and many
             websites do not respond to DNT signals at this time.
           </p>
 
-          <h3>9. Policy Updates</h3>
+          <h3>8. Policy Updates</h3>
           <p>
             We may update this Cookie Policy from time to time to reflect changes in our practices or
             applicable laws. We will notify you of significant changes by updating the "Effective Date"

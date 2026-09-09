@@ -1,9 +1,6 @@
-import AdBanner from '../AdBanner'
 import type { ApkVersion, FeatureItem, SiteSettings } from '../types'
 import { downloadApkFile } from '../apkDownload'
 import { OptimizedImage } from '../components/OptimizedImage'
-
-const AD_SLOT_FEATURES = '1647148762'
 
 export function FeaturesSection({
   features,
@@ -49,8 +46,6 @@ export function FeaturesSection({
         </div>
       </section>
 
-      {/* ── Ad Banner 1 — Between Features & App Section ── */}
-      <AdBanner adSlot={AD_SLOT_FEATURES} adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
     </>
   )
 }
