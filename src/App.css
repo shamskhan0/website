@@ -44,6 +44,18 @@ em {
   font-weight: 800;
 }
 
+.desktop-viewport {
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.desktop-canvas {
+  width: 1440px;
+  min-height: 100vh;
+  will-change: transform;
+}
+
 .site-shell {
   overflow: hidden;
   background:

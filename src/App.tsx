@@ -73,6 +73,29 @@ const isAdminUser = (v: unknown): v is AdminUser =>
   typeof (v as AdminUser).name === 'string' &&
   typeof (v as AdminUser).email === 'string'
 
+function DesktopViewport({ children }: { children: React.ReactNode }) {
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    const updateScale = () => {
+      const width = viewportRef.current?.clientWidth ?? window.innerWidth
+      setScale(Math.min(1, width / 1440))
+    }
+    updateScale()
+    window.addEventListener('resize', updateScale)
+    return () => window.removeEventListener('resize', updateScale)
+  }, [])
+
+  return (
+    <div className="desktop-viewport" ref={viewportRef}>
+      <div className="desktop-canvas" style={{ transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 function TrustHighlightsBar() {
   const items = [
     { icon: '◎', label: 'Secure Experience' },
@@ -458,8 +481,9 @@ function App() {
   }
 
   return (
-    <div className="site-shell">
-      <AnnouncementBar siteSettings={siteSettings} />
+    <DesktopViewport>
+      <div className="site-shell">
+        <AnnouncementBar siteSettings={siteSettings} />
 
       <SiteHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} onOpenAbout={() => setActiveModal('about')} siteSettings={siteSettings} />
 
@@ -498,8 +522,9 @@ function App() {
         {activeModal === 'disclaimer' && <DisclaimerModal onClose={() => setActiveModal(null)} />}
         {activeModal === 'cookie' && <CookiePolicyModal onClose={() => setActiveModal(null)} />}
         {selectedArticle && <ArticleReaderModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
-      </Suspense>
-    </div>
+        </Suspense>
+      </div>
+    </DesktopViewport>
   )
 }
 
