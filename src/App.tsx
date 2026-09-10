@@ -361,7 +361,8 @@ function App() {
   // Choice save hoti hai taake agla page khulne par bhi yaad rahe.
   const [forceDesktop, setForceDesktop] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('rd_desktop_view') === '1'
+      const saved = localStorage.getItem('rd_desktop_view')
+      return saved === null || saved === '1'
     } catch {
       return false
     }

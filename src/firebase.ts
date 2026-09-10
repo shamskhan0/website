@@ -13,7 +13,15 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? '',
 }
 
-export const firebaseEnabled = Object.values(firebaseConfig).every(Boolean)
+const requiredFirebaseConfig = [
+  firebaseConfig.apiKey,
+  firebaseConfig.authDomain,
+  firebaseConfig.projectId,
+  firebaseConfig.storageBucket,
+  firebaseConfig.messagingSenderId,
+  firebaseConfig.appId,
+]
+export const firebaseEnabled = requiredFirebaseConfig.every(Boolean)
 const app = firebaseEnabled ? initializeApp(firebaseConfig) : null
 export const auth = app ? getAuth(app) : null
 export const firestore = app ? getFirestore(app) : null
@@ -86,6 +94,7 @@ export async function uploadImage(
   onProgress?: (percent: number, stage: UploadStage) => void,
 ): Promise<{ url: string; path: string; width: number; height: number; format: string; size: number; version: number } | { error: string }> {
   if (!firebaseEnabled || !storage) return { error: 'Firebase is not configured. Add the VITE_FIREBASE_* values and redeploy.' }
+  if (!auth?.currentUser) return { error: 'Firebase admin login required. Logout and login again before uploading.' }
   onProgress?.(5, 'validating')
   if (file.type === 'image/svg+xml') return { error: 'SVG files are not allowed. Please upload PNG, WebP or JPG.' }
   if (!ALLOWED_IMAGE_TYPES[file.type]) return { error: 'Unsupported image format. Allowed: JPG, PNG, WebP, GIF, AVIF.' }
@@ -104,7 +113,17 @@ export async function uploadImage(
   try {
     const task = uploadBytesResumable(ref(storage, path), optimized.blob, { contentType: `image/${optimized.format === 'jpg' ? 'jpeg' : optimized.format}` })
     await new Promise<void>((resolve, reject) => {
-      task.on('state_changed', (snapshot) => onProgress?.(30 + Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 55), 'uploading'), reject, resolve)
+      const timeout = setTimeout(() => {
+        task.cancel()
+        reject(new Error('Upload timed out. Check Firebase Storage rules and your internet connection.'))
+      }, 120000)
+      task.on('state_changed', (snapshot) => onProgress?.(30 + Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 55), 'uploading'), (error) => {
+        clearTimeout(timeout)
+        reject(error)
+      }, () => {
+        clearTimeout(timeout)
+        resolve()
+      })
     })
     onProgress?.(90, 'finalizing')
     const url = await getDownloadURL(ref(storage, path))
@@ -119,14 +138,29 @@ export async function uploadImage(
 
 export async function uploadFile(file: File, folder = 'apk', onProgress?: (percent: number) => void): Promise<{ url: string; path: string } | { error: string }> {
   if (!firebaseEnabled || !storage) return { error: 'Firebase is not configured. Add the VITE_FIREBASE_* values and redeploy.' }
+  if (!auth?.currentUser) return { error: 'Firebase admin login required. Logout and login again before uploading.' }
   if (!file.size) return { error: 'The selected file is empty.' }
   if (file.size > 150 * 1024 * 1024) return { error: 'APK file is larger than the 150MB limit.' }
   const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin' : 'bin'
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
   try {
-    const task = uploadBytesResumable(ref(storage, path), file, { contentType: file.type || 'application/vnd.android.package-archive' })
+    const task = uploadBytesResumable(ref(storage, path), file, {
+      contentType: file.type || 'application/vnd.android.package-archive',
+      contentDisposition: `attachment; filename="${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}"`,
+      cacheControl: 'public,max-age=3600',
+    })
     await new Promise<void>((resolve, reject) => {
-      task.on('state_changed', (snapshot) => onProgress?.(Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 90)), reject, resolve)
+      const timeout = setTimeout(() => {
+        task.cancel()
+        reject(new Error('Upload timed out. Check Firebase Storage rules and your internet connection.'))
+      }, 120000)
+      task.on('state_changed', (snapshot) => onProgress?.(Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 90)), (error) => {
+        clearTimeout(timeout)
+        reject(error)
+      }, () => {
+        clearTimeout(timeout)
+        resolve()
+      })
     })
     const url = await getDownloadURL(ref(storage, path))
     onProgress?.(100)

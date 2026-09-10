@@ -40,6 +40,19 @@ export async function downloadApkFile(
   try {
     // Verify Firebase Storage or another permanent URL before downloading.
     const primaryUrl = new URL(url, window.location.origin).href
+    const isFirebaseStorageUrl = primaryUrl.includes('firebasestorage.googleapis.com') || primaryUrl.includes('storage.googleapis.com')
+    if (isFirebaseStorageUrl) {
+      const anchor = document.createElement('a')
+      anchor.href = primaryUrl
+      anchor.download = fallbackName
+      anchor.target = '_blank'
+      anchor.rel = 'noopener'
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      showToast?.('✅ APK download shuru ho gayi!')
+      return { ok: true, via: 'direct', filename: fallbackName }
+    }
     if (!(await headOk(primaryUrl))) {
       const msg = 'APK file server par available nahi hai. Thori dair baad dobara koshish karein.'
       showToast?.(`⚠️ ${msg}`)
