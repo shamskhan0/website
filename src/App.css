@@ -54,7 +54,7 @@ em {
 }
 
 .desktop-canvas {
-  width: 1440px;
+  width: 100%;
   min-height: 100vh;
   transform: translateZ(0); /* GPU layer: smooth scaling & scrolling on mobile */
   backface-visibility: hidden;

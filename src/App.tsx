@@ -82,8 +82,10 @@ function DesktopViewport({ children, forceDesktop }: { children: React.ReactNode
 
   useEffect(() => {
     const updateScale = () => {
-      // Keep the desktop composition, but scale it to fit the available
-      // viewport so mobile users see the complete page in one view.
+      if (!forceDesktop) {
+        setScale(1)
+        return
+      }
       const width = viewportRef.current?.clientWidth ?? window.innerWidth
       setScale(width / 1440)
     }
@@ -352,27 +354,6 @@ function App() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
 
-  // Mobile par "Desktop view" toggle — browser ke "Desktop site" jaisa.
-  // Choice save hoti hai taake agla page khulne par bhi yaad rahe.
-  const [forceDesktop, setForceDesktop] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('rd_desktop_view')
-      return saved === null || saved === '1'
-    } catch {
-      return false
-    }
-  })
-  const toggleDesktopView = () => {
-    setForceDesktop((prev) => {
-      const next = !prev
-      try {
-        localStorage.setItem('rd_desktop_view', next ? '1' : '0')
-      } catch {
-        // ignore
-      }
-      return next
-    })
-  }
   const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | 'disclaimer' | 'cookie' | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
@@ -534,18 +515,7 @@ function App() {
 
   return (
     <>
-      {/* Desktop/Mobile view toggle — sirf touch devices par dikhata hai */}
-      <button
-        type="button"
-        className={`view-mode-toggle ${forceDesktop ? 'active' : ''}`}
-        onClick={toggleDesktopView}
-        aria-pressed={forceDesktop}
-        title={forceDesktop ? 'Switch to mobile view' : 'Switch to desktop view'}
-      >
-        <span aria-hidden="true">🖥</span>
-        {forceDesktop ? 'Mobile View' : 'Desktop View'}
-      </button>
-      <DesktopViewport forceDesktop={forceDesktop}>
+      <DesktopViewport forceDesktop={false}>
       <div className="site-shell">
         <AnnouncementBar siteSettings={siteSettings} />
 
