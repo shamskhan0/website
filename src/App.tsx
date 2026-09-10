@@ -82,13 +82,8 @@ function DesktopViewport({ children, forceDesktop }: { children: React.ReactNode
 
   useEffect(() => {
     const updateScale = () => {
-      // "Desktop view" mode: hamesha real 1440px desktop layout (mobile par
-      // browser zoom/horizontal scroll ke saath — bilkul waise jaise desktop
-      // browser mein dikhti hai). Warna screen ke hisaab se exact fit.
-      if (forceDesktop) {
-        setScale(1)
-        return
-      }
+      // Keep the desktop composition, but scale it to fit the available
+      // viewport so mobile users see the complete page in one view.
       const width = viewportRef.current?.clientWidth ?? window.innerWidth
       setScale(width / 1440)
     }

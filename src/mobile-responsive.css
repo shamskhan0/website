@@ -286,24 +286,22 @@ html {
     display: inline-flex;
   }
 
-  /* Force-desktop mode: real 1440px layout, browser horizontal scroll ke saath */
+  /* Force-desktop mode keeps the desktop composition but fits it to mobile. */
   .desktop-viewport.force-desktop {
-    overflow-x: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
   .desktop-viewport.force-desktop .desktop-canvas {
-    transform: none;
+    width: 1440px;
   }
 }
 
 @media (min-width: 901px) and (hover: hover) and (pointer: fine) {
   .desktop-viewport.force-desktop {
-    overflow-x: auto;
+    overflow-x: hidden;
   }
   .desktop-viewport.force-desktop .desktop-canvas {
-    width: 100%;
-    min-width: 0;
-    transform: none;
+    width: 1440px;
   }
 }
 
