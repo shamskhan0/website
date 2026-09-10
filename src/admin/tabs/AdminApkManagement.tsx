@@ -22,6 +22,7 @@ export function AdminApkManagement({
   setSiteSettings: (s: SiteSettings) => void
 }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [externalApkUrl, setExternalApkUrl] = useState('')
   const [versionName, setVersionName] = useState('2.1.0')
   const [buildNumber, setBuildNumber] = useState('210')
   const [fileSize, setFileSize] = useState('49.2 MB')
@@ -37,6 +38,7 @@ export function AdminApkManagement({
     const file = e.target.files?.[0]
     if (file) {
       setSelectedFile(file)
+      setExternalApkUrl('')
       const mb = (file.size / (1024 * 1024)).toFixed(1)
       setFileSize(`${mb} MB`)
     }
@@ -45,25 +47,38 @@ export function AdminApkManagement({
   const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!selectedFile) {
-      showToast('Pehle APK file select karein.')
+    if (!selectedFile && !externalApkUrl.trim()) {
+      showToast('APK file select karein ya GitHub Release ka direct URL paste karein.')
       return
     }
-    if (!selectedFile.name.toLowerCase().endsWith('.apk')) {
+    if (selectedFile && !selectedFile.name.toLowerCase().endsWith('.apk')) {
       showToast('Sirf .apk file upload karein.')
       return
     }
+    const suppliedUrl = externalApkUrl.trim()
+    if (!selectedFile && suppliedUrl) {
+      try {
+        const parsed = new URL(suppliedUrl)
+        if (parsed.protocol !== 'https:' || !parsed.pathname.toLowerCase().endsWith('.apk')) throw new Error()
+      } catch {
+        showToast('Valid HTTPS APK link paste karein, jo .apk par end hota ho.')
+        return
+      }
+    }
 
     setIsUploading(true)
-    setStatus('APK Firebase Storage par upload ho rahi hai… (150MB tak me waqt lag sakta hai)')
+    setStatus(selectedFile ? 'APK Firebase Storage par upload ho rahi hai… (150MB tak me waqt lag sakta hai)' : 'GitHub APK link save ho raha hai…')
 
-    // STEP 1: Real upload to Firebase Storage
-    const result = await uploadFile(selectedFile, 'apk')
-    if ('error' in result) {
-      setIsUploading(false)
-      setStatus('')
-      showToast(`Upload failed: ${result.error}`)
-      return
+    let downloadUrl = suppliedUrl
+    if (selectedFile) {
+      const result = await uploadFile(selectedFile, 'apk')
+      if ('error' in result) {
+        setIsUploading(false)
+        setStatus('')
+        showToast(`Upload failed: ${result.error}`)
+        return
+      }
+      downloadUrl = result.url
     }
 
     // STEP 2: Save record with REAL download URL to cloud database
@@ -79,7 +94,7 @@ export function AdminApkManagement({
       downloads: 0,
       sha256: Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
       changelog: changelogText.split('\n').filter((line) => line.trim().length > 0),
-      downloadUrl: result.url, // ✅ REAL Firebase Storage URL — ab APK hi download hogi
+      downloadUrl,
     }
 
     let updatedList = apkVersions
@@ -93,7 +108,7 @@ export function AdminApkManagement({
       const ops: Promise<boolean>[] = [pushCloudData('apk_versions', nextList)]
       // LIVE release par website ke download buttons bhi nayi APK par point karo
       if (releaseChannel === 'LIVE') {
-        const nextSettings = { ...siteSettings, apkDownloadUrl: result.url }
+        const nextSettings = { ...siteSettings, apkDownloadUrl: downloadUrl }
         setSiteSettings(nextSettings)
         ops.push(pushCloudSettings(nextSettings))
       }
@@ -101,6 +116,7 @@ export function AdminApkManagement({
       setIsUploading(false)
       setStatus('')
       setSelectedFile(null)
+      setExternalApkUrl('')
       if (results.every(Boolean)) {
         showToast(`✅ APK v${newApk.version} published! Website ka download button ab nayi APK serve karega — har browser/device par.`)
       } else {
@@ -110,6 +126,7 @@ export function AdminApkManagement({
       setIsUploading(false)
       setStatus('')
       setSelectedFile(null)
+      setExternalApkUrl('')
       showToast(`APK v${newApk.version} saved locally (cloud sync off).`)
     }
   }
@@ -171,21 +188,35 @@ export function AdminApkManagement({
       <div className="admin-card">
         <div className="admin-card-header">
           <div>
-            <h3>Upload New APK Package</h3>
-            <p>Release a new version to the Roshan Digital mobile network</p>
+            <h3>Publish New APK Release</h3>
+            <p>GitHub Release link recommended. Firebase upload is optional.</p>
           </div>
         </div>
 
         <form onSubmit={handlePublish}>
           <div className="admin-form-group full-width" style={{ marginBottom: '18px' }}>
-            <label>Select APK Binary File</label>
+            <label>GitHub Release APK URL (recommended)</label>
+            <input
+              type="url"
+              className="admin-input"
+              value={externalApkUrl}
+              onChange={(e) => { setExternalApkUrl(e.target.value); setSelectedFile(null) }}
+              placeholder="https://github.com/owner/repo/releases/download/v2.1.0/app.apk"
+            />
+            <small style={{ display: 'block', marginTop: '7px', color: '#94a3b8' }}>
+              GitHub Release ka direct link paste karein jo .apk par end hota ho.
+            </small>
+          </div>
+
+          <div className="admin-form-group full-width" style={{ marginBottom: '18px' }}>
+            <label>Ya APK file select karein (Firebase Storage)</label>
             <label className="admin-dropzone">
               <span className="admin-dropzone-icon">↥</span>
               <b style={{ color: '#fff', fontSize: '14px' }}>
                 {selectedFile ? selectedFile.name : 'Click to select APK file or drag & drop'}
               </b>
               <span style={{ color: '#64748b', fontSize: '12px' }}>
-                {selectedFile ? `Size: ${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : 'Supports .apk (Max 150 MB)'}
+                {selectedFile ? `Size: ${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB` : 'Optional — supports .apk (Max 150 MB)'}
               </span>
               <input type="file" accept=".apk" onChange={handleFileChange} style={{ display: 'none' }} />
             </label>
@@ -267,7 +298,7 @@ export function AdminApkManagement({
               {isUploading ? 'Deploying… (upload + DB save chal raha hai)' : '🚀 Deploy & Publish APK ↗'}
             </button>
             <small style={{ display: 'block', marginTop: '8px', color: '#94a3b8' }}>
-              Deploy dabate hi APK Firebase Storage par upload ho kar database mein save hogi — website ka download button phir direct ye APK download karega.
+              GitHub URL use karne par file Firebase par upload nahi hogi; website ka download button direct GitHub APK download karega.
             </small>
           </div>
         </form>
