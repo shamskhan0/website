@@ -1,5 +1,6 @@
 import type { SiteSettings, ApkVersion, ManagedImage } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'
+import { ApkDownloadButton } from '../components/ApkDownloadButton'
 
 const getManagedImageUrl = (image?: ManagedImage) => {
   if (!image?.url) return '/app-screenshot.jpg'
@@ -73,7 +74,11 @@ export function HeroSection({
         <h1>{siteSettings.heroTitle}</h1>
         <p className="hero-text">{siteSettings.heroSubtitle}</p>
         <div className="hero-actions">
-          <a className="button button-primary" href="#app">Download latest APK <span>↓</span></a>
+          <ApkDownloadButton
+            liveApk={liveApk}
+            className="button button-primary download-cta-button"
+            label="Download APK directly"
+          />
           <a className="text-link" href="#news">Explore latest news <span>→</span></a>
         </div>
         <div className="hero-meta">

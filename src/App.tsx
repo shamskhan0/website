@@ -342,7 +342,11 @@ function FinalDownloadCta({ siteSettings, liveApk }: { siteSettings: SiteSetting
         <h2>Experience Roshan Digital</h2>
         <p>Discover a modern digital experience designed around simplicity and convenience.</p>
         <div className="hero-actions">
-          <ApkDownloadButton liveApk={liveApk} className="button button-primary" label="Download App" />
+          <ApkDownloadButton
+            liveApk={liveApk}
+            className="button button-primary download-cta-button"
+            label="Download APK directly"
+          />
         </div>
       </div>
     </section>

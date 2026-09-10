@@ -1903,6 +1903,15 @@ main.scroll-scenes-ready > section.scroll-scene-visible .news-card:nth-child(3) 
   box-shadow: 0 15px 35px rgba(255, 255, 255, 0.35);
 }
 
+.download-cta-button {
+  min-height: 58px;
+  min-width: 238px;
+  padding: 17px 28px;
+  font-size: 15px;
+  letter-spacing: 0.4px;
+  justify-content: center;
+}
+
 .android-note {
   display: block;
   color: #64748b;
