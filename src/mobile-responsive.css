@@ -133,9 +133,26 @@ html {
   .site-header nav {
     top: 64px;
   }
+
+  main.scroll-scenes-ready {
+    perspective: 900px;
+  }
+
+  main.scroll-scenes-ready > section {
+    transform: translate3d(0, 30px, -24px) rotateX(3deg) scale(0.992);
+    transition-duration: 0.7s;
+  }
   .menu-toggle {
     font-size: 20px;
     padding: 8px 14px;
+  }
+  .search-toggle {
+    width: 42px;
+    padding: 0;
+    gap: 0;
+  }
+  .search-toggle-label {
+    display: none;
   }
 
   /* The public site keeps the exact desktop composition. It is scaled by

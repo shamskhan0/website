@@ -32,7 +32,8 @@ export function SiteHeader({
         {menuOpen ? '×' : '☰'}
       </button>
       <button className="search-toggle" onClick={() => onOpenSearch?.()} aria-label="Search the website" title="Search">
-        ⌕
+        <span className="search-toggle-icon" aria-hidden="true">⌕</span>
+        <span className="search-toggle-label">Search</span>
       </button>
       <nav className={menuOpen ? 'open' : ''}>
         <a href="#top" onClick={() => setMenuOpen(false)}>Home</a>

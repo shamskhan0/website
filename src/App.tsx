@@ -357,6 +357,27 @@ function App() {
   const [activeModal, setActiveModal] = useState<'help' | 'privacy' | 'about' | 'terms' | 'disclaimer' | 'cookie' | null>(null)
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
+  useEffect(() => {
+    const main = document.querySelector<HTMLElement>('#top')
+    if (!main || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const sections = Array.from(main.children).filter((element): element is HTMLElement => element instanceof HTMLElement)
+    main.classList.add('scroll-scenes-ready')
+    sections.forEach((section, index) => section.style.setProperty('--scroll-index', String(Math.min(index, 8))))
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scroll-scene-visible')
+          observer.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' })
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
+
   // Dynamic Data States saved in localStorage (validated + safe fallback).
   // usePersistedState writes through to localStorage on every update.
   const [featuresList, setFeaturesList] = usePersistedState('rd_features_data_v1', INITIAL_FEATURES, isFeatureList)
