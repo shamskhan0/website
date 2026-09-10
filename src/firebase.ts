@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app'
 import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 import { getFirestore, collection, doc, getDocs, onSnapshot, setDoc } from 'firebase/firestore'
 import { deleteObject, getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
+import { createClient } from '@supabase/supabase-js'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? '',
@@ -22,6 +23,12 @@ const requiredFirebaseConfig = [
   firebaseConfig.appId,
 ]
 export const firebaseEnabled = requiredFirebaseConfig.every(Boolean)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? ''
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? ''
+const supabaseBucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET ?? 'media'
+export const supabaseStorageEnabled = Boolean(supabaseUrl && supabasePublishableKey)
+const supabase = supabaseStorageEnabled ? createClient(supabaseUrl, supabasePublishableKey) : null
+export const cloudStorageEnabled = firebaseEnabled || supabaseStorageEnabled
 const app = firebaseEnabled ? initializeApp(firebaseConfig) : null
 export const auth = app ? getAuth(app) : null
 export const firestore = app ? getFirestore(app) : null
@@ -64,7 +71,7 @@ async function optimizeImage(file: File, img: HTMLImageElement): Promise<{ blob:
     return { blob: file, format: ALLOWED_IMAGE_TYPES[file.type] }
   }
   const maxDim = 1920
-  const scale = Math.min(maxDim / img.naturalWidth, maxDim / img.naturalHeight, 1)
+  const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight))
   const canvas = document.createElement('canvas')
   canvas.width = Math.max(1, Math.round(img.naturalWidth * scale))
   canvas.height = Math.max(1, Math.round(img.naturalHeight * scale))
@@ -93,8 +100,8 @@ export async function uploadImage(
   folder = 'images',
   onProgress?: (percent: number, stage: UploadStage) => void,
 ): Promise<{ url: string; path: string; width: number; height: number; format: string; size: number; version: number } | { error: string }> {
-  if (!firebaseEnabled || !storage) return { error: 'Firebase is not configured. Add the VITE_FIREBASE_* values and redeploy.' }
-  if (!auth?.currentUser) return { error: 'Firebase admin login required. Logout and login again before uploading.' }
+  if (!supabaseStorageEnabled && (!firebaseEnabled || !storage)) return { error: 'Storage is not configured. Add Supabase or Firebase Storage environment variables.' }
+  if (!supabaseStorageEnabled && !auth?.currentUser) return { error: 'Firebase admin login required. Logout and login again before uploading.' }
   onProgress?.(5, 'validating')
   if (file.type === 'image/svg+xml') return { error: 'SVG files are not allowed. Please upload PNG, WebP or JPG.' }
   if (!ALLOWED_IMAGE_TYPES[file.type]) return { error: 'Unsupported image format. Allowed: JPG, PNG, WebP, GIF, AVIF.' }
@@ -114,9 +121,21 @@ export async function uploadImage(
   }
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${optimized.format}`
   const path = `${folder}/${safeName}`
+  if (supabase) {
+    onProgress?.(30, 'uploading')
+    const { error } = await supabase.storage.from(supabaseBucket).upload(path, optimized.blob, {
+      contentType: `image/${optimized.format === 'jpg' ? 'jpeg' : optimized.format}`,
+      cacheControl: '3600',
+      upsert: false,
+    })
+    if (error) return { error: error.message }
+    const url = supabase.storage.from(supabaseBucket).getPublicUrl(path).data.publicUrl
+    onProgress?.(100, 'done')
+    return { url, path, width: image.naturalWidth, height: image.naturalHeight, format: optimized.format, size: optimized.blob.size, version: Date.now() }
+  }
   onProgress?.(30, 'uploading')
   try {
-    const task = uploadBytesResumable(ref(storage, path), optimized.blob, { contentType: `image/${optimized.format === 'jpg' ? 'jpeg' : optimized.format}` })
+    const task = uploadBytesResumable(ref(storage!, path), optimized.blob, { contentType: `image/${optimized.format === 'jpg' ? 'jpeg' : optimized.format}` })
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         task.cancel()
@@ -131,25 +150,25 @@ export async function uploadImage(
       })
     })
     onProgress?.(90, 'finalizing')
-    const url = await getDownloadURL(ref(storage, path))
+    const url = await getDownloadURL(ref(storage!, path))
     await loadWithRetry(url, 1)
     onProgress?.(100, 'done')
     return { url, path, width: image.naturalWidth, height: image.naturalHeight, format: optimized.format, size: optimized.blob.size, version: Date.now() }
   } catch (error) {
-    await deleteObject(ref(storage, path)).catch(() => undefined)
+    await deleteObject(ref(storage!, path)).catch(() => undefined)
     return { error: storageError(error) }
   }
 }
 
 export async function uploadFile(file: File, folder = 'apk', onProgress?: (percent: number) => void): Promise<{ url: string; path: string } | { error: string }> {
-  if (!firebaseEnabled || !storage) return { error: 'Firebase is not configured. Add the VITE_FIREBASE_* values and redeploy.' }
+  if (!firebaseEnabled || !storage) return { error: 'APK uploads require Firebase Storage. Supabase is configured for images only.' }
   if (!auth?.currentUser) return { error: 'Firebase admin login required. Logout and login again before uploading.' }
   if (!file.size) return { error: 'The selected file is empty.' }
   if (file.size > 150 * 1024 * 1024) return { error: 'APK file is larger than the 150MB limit.' }
   const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin' : 'bin'
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
   try {
-    const task = uploadBytesResumable(ref(storage, path), file, {
+    const task = uploadBytesResumable(ref(storage!, path), file, {
       contentType: file.type || 'application/vnd.android.package-archive',
       contentDisposition: `attachment; filename="${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}"`,
       cacheControl: 'public,max-age=3600',
@@ -167,7 +186,7 @@ export async function uploadFile(file: File, folder = 'apk', onProgress?: (perce
         resolve()
       })
     })
-    const url = await getDownloadURL(ref(storage, path))
+    const url = await getDownloadURL(ref(storage!, path))
     onProgress?.(100)
     return { url, path }
   } catch (error) {
@@ -176,7 +195,13 @@ export async function uploadFile(file: File, folder = 'apk', onProgress?: (perce
 }
 
 export async function deleteImageByUrl(url: string): Promise<void> {
-  if (!storage || !url) return
+  if (!url) return
+  if (supabase && url.includes(`${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/`)) {
+    const prefix = `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/`
+    await supabase.storage.from(supabaseBucket).remove([decodeURIComponent(url.slice(prefix.length))])
+    return
+  }
+  if (!storage) return
   try {
     await deleteObject(ref(storage, url))
   } catch {
@@ -210,9 +235,19 @@ export async function signOutAdmin() {
 }
 
 export async function readCloudData(): Promise<Record<string, unknown>> {
-  if (!firestore) return {}
-  const snapshot = await getDocs(collection(firestore, MEDIA_COLLECTION))
-  return Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data().value]))
+  if (firestore) {
+    const snapshot = await getDocs(collection(firestore, MEDIA_COLLECTION))
+    return Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data().value]))
+  }
+  if (supabase) {
+    const { data, error } = await supabase.from(MEDIA_COLLECTION).select('key,value')
+    if (error) {
+      console.error('readCloudData:', error)
+      return {}
+    }
+    return Object.fromEntries((data ?? []).map((item) => [item.key, item.value]))
+  }
+  return {}
 }
 
 export async function readCloudValue<T>(key: string): Promise<T | null> {
@@ -221,9 +256,14 @@ export async function readCloudValue<T>(key: string): Promise<T | null> {
 }
 
 export async function writeCloudValue(key: string, value: unknown): Promise<boolean> {
-  if (!firestore) return false
+  if (!firestore && !supabase) return false
   try {
-    await setDoc(doc(firestore, MEDIA_COLLECTION, key), { value, updated_at: new Date().toISOString() })
+    if (firestore) {
+      await setDoc(doc(firestore, MEDIA_COLLECTION, key), { value, updated_at: new Date().toISOString() })
+    } else {
+      const { error } = await supabase!.from(MEDIA_COLLECTION).upsert({ key, value, updated_at: new Date().toISOString() })
+      if (error) throw error
+    }
     return true
   } catch (error) {
     console.error(`writeCloudValue(${key}):`, error)
@@ -232,6 +272,10 @@ export async function writeCloudValue(key: string, value: unknown): Promise<bool
 }
 
 export function subscribeCloudData(onChange: () => void): () => void {
-  if (!firestore) return () => undefined
-  return onSnapshot(collection(firestore, MEDIA_COLLECTION), onChange, (error) => console.error('subscribeCloudData:', error))
+  if (firestore) return onSnapshot(collection(firestore, MEDIA_COLLECTION), onChange, (error) => console.error('subscribeCloudData:', error))
+  if (supabase) {
+    const channel = supabase.channel('cloud-data-changes').on('postgres_changes', { event: '*', schema: 'public', table: MEDIA_COLLECTION }, onChange).subscribe()
+    return () => { void supabase!.removeChannel(channel) }
+  }
+  return () => undefined
 }

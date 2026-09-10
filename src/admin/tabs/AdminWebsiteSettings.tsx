@@ -178,6 +178,40 @@ export function AdminWebsiteSettings({
     }
   }
 
+  const useExternalImageUrl = async (key: string) => {
+    const url = window.prompt('Public image URL paste karein (https://...):', formData.images?.[key]?.url || '')?.trim()
+    if (!url) return
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol !== 'https:') throw new Error()
+    } catch {
+      setStatusMessage('Valid HTTPS image URL paste karein.')
+      return
+    }
+
+    const current = formData.images?.[key]
+    const nextImage: ManagedImage = {
+      ...(current ?? createManagedImage(key, '', 'external-image')),
+      key,
+      url,
+      fileName: 'external-image-url',
+      updatedDate: new Date().toISOString(),
+      active: true,
+      version: (current?.version ?? 0) + 1,
+    }
+    const nextSettings: SiteSettings = {
+      ...formData,
+      images: { ...(formData.images ?? {}), [key]: nextImage },
+    }
+    setFormData(nextSettings)
+    if (onPublishAll) {
+      setStatusMessage('Image URL live website par publish ho raha hai…')
+      setStatusMessage(await onPublishAll(nextSettings))
+    } else {
+      setStatusMessage('Image URL set ho gaya. Save & Publish dabayein.')
+    }
+  }
+
   return (
     <div className="admin-card">
       <div className="admin-card-header">
@@ -306,6 +340,9 @@ export function AdminWebsiteSettings({
                       />
                       <button type="button" className="admin-action-btn" onClick={() => handleImageDelete(imageConfig.key)}>
                         Delete Image
+                      </button>
+                      <button type="button" className="admin-action-btn" onClick={() => void useExternalImageUrl(imageConfig.key)}>
+                        Use image URL
                       </button>
                     </div>
 

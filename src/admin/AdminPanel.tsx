@@ -23,7 +23,7 @@ function useCloudSave(setSiteSettings: (s: SiteSettings) => void) {
         ? `${label} saved & synced to the live website — sab users ko nazar aayega.`
         : `${label} saved locally, lekin cloud sync FAIL hui. Internet check karein.`
     }
-    return `${label} saved locally. Firebase cloud sync is not configured, so other visitors will not see this change yet.`
+    return `${label} saved locally. Cloud sync is not configured, so other visitors will not see this change yet.`
   }
 }
 

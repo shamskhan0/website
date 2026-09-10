@@ -1,6 +1,6 @@
-import { readCloudData, readCloudValue, subscribeCloudData, writeCloudValue, firebaseEnabled } from './firebase'
+import { readCloudData, readCloudValue, subscribeCloudData, writeCloudValue, cloudStorageEnabled } from './firebase'
 
-export const cloudSyncEnabled = firebaseEnabled
+export const cloudSyncEnabled = cloudStorageEnabled
 
 export async function fetchCloudSettings<T>(): Promise<T | null> {
   return readCloudValue<T>('site_settings')
