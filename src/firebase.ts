@@ -67,7 +67,7 @@ function decodeImage(file: File): Promise<HTMLImageElement> {
 }
 
 async function optimizeImage(file: File, img: HTMLImageElement): Promise<{ blob: Blob; format: string }> {
-  if (file.type === 'image/webp' || file.type === 'image/avif' || file.type === 'image/gif') {
+  if (file.type === 'image/avif' || file.type === 'image/gif') {
     return { blob: file, format: ALLOWED_IMAGE_TYPES[file.type] }
   }
   const maxDim = 1920
@@ -80,9 +80,12 @@ async function optimizeImage(file: File, img: HTMLImageElement): Promise<{ blob:
   context.imageSmoothingEnabled = true
   context.imageSmoothingQuality = 'high'
   context.drawImage(img, 0, 0, canvas.width, canvas.height)
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.82))
-  if (!blob || blob.size >= file.size) return { blob: file, format: ALLOWED_IMAGE_TYPES[file.type] }
-  return { blob, format: 'webp' }
+  // Convert WebP/PNG resizing output to JPEG so restrictive storage buckets
+  // that only allow JPG/PNG still accept the uploaded picture.
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.86))
+  if (!blob) return { blob: file, format: ALLOWED_IMAGE_TYPES[file.type] }
+  if (blob.size >= file.size && file.type !== 'image/webp') return { blob: file, format: ALLOWED_IMAGE_TYPES[file.type] }
+  return { blob, format: 'jpg' }
 }
 
 export type UploadStage = 'validating' | 'optimizing' | 'uploading' | 'finalizing' | 'done'
