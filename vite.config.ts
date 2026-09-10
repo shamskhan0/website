@@ -26,6 +26,6 @@ export default defineConfig(() => {
         },
       },
     },
-    envPrefix: ['VITE_'],
+    envPrefix: ['VITE_', 'apiKey_2'],
   }
 })
