@@ -31,22 +31,17 @@ create policy "update cloud_data" on cloud_data for update using (true) with che
 -- Dashboard → Storage → check bucket 'media' exists and is PUBLIC.
 -- Agar nahi hai to SQL editor se nahi ban sakta — Storage → New bucket:
 --   Name: media   Public bucket: ON   File size limit: 5242880 (5MB)
---   Allowed MIME types: image/jpeg, image/png, image/webp, image/gif,
---                       image/svg+xml, image/avif
+--   Allowed MIME types: leave unrestricted. The frontend accepts pictures only.
 -- Phir Storage → media → Policies → New policy (or run these, storage
 -- policies CAN run in SQL editor on storage.objects):
--- Existing bucket ki MIME restrictions ko bhi explicitly update karein:
-update storage.buckets
-set public = true,
-    allowed_mime_types = array[
-      'image/jpeg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/avif'
-    ],
-    file_size_limit = 10485760
-where id = 'media';
+-- Create the bucket if missing, or repair its settings if it already exists.
+-- NULL prevents stale MIME settings from rejecting valid JPG/WebP pictures.
+insert into storage.buckets (id, name, public, allowed_mime_types, file_size_limit)
+values ('media', 'media', true, null, 10485760)
+on conflict (id) do update set
+  public = excluded.public,
+  allowed_mime_types = excluded.allowed_mime_types,
+  file_size_limit = excluded.file_size_limit;
 
 create policy "media public read"
   on storage.objects for select

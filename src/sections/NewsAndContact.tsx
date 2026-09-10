@@ -1,8 +1,5 @@
-import AdBanner from '../AdBanner'
 import type { NewsItem, SiteSettings } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'
-
-const AD_SLOT_NEWS = '1647148763'
 
 export function NewsSection({
   newsList,
@@ -15,7 +12,6 @@ export function NewsSection({
   const gridArticles = newsList.filter((n) => n.id !== featuredArticle?.id)
 
   return (
-    <>
       <section className="section news-section" id="news">
         <div className="section-heading news-heading">
           <p className="eyebrow">FROM ROSHAN DIGITAL <span></span></p>
@@ -106,10 +102,6 @@ export function NewsSection({
           ))}
         </div>
       </section>
-
-      {/* ── Ad Banner 2 — Between News & Contact Section ── */}
-      <AdBanner adSlot={AD_SLOT_NEWS} adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
-    </>
   )
 }
 

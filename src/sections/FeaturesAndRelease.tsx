@@ -1,9 +1,6 @@
-import AdBanner from '../AdBanner'
 import type { ApkVersion, FeatureItem, SiteSettings } from '../types'
 import { ApkDownloadButton } from '../components/ApkDownloadButton'
 import { OptimizedImage } from '../components/OptimizedImage'
-
-const AD_SLOT_FEATURES = '1647148762'
 
 export function FeaturesSection({
   features,
@@ -13,7 +10,6 @@ export function FeaturesSection({
   onOpenAbout: () => void
 }) {
   return (
-    <>
       <section className="section features-section" id="about">
         <div className="section-heading">
           <p className="eyebrow">THE ROSHAN DIFFERENCE <span></span></p>
@@ -48,10 +44,6 @@ export function FeaturesSection({
           ))}
         </div>
       </section>
-
-      {/* ── Ad Banner 1 — Between Features & App Section ── */}
-      <AdBanner adSlot={AD_SLOT_FEATURES} adFormat="auto" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
-    </>
   )
 }
 

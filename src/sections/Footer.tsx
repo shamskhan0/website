@@ -1,8 +1,5 @@
-import AdBanner from '../AdBanner'
 import type { SiteSettings } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'
-
-const AD_SLOT_FOOTER = '1647148764'
 
 export function SiteFooter({
   onOpenAbout,
@@ -22,9 +19,6 @@ export function SiteFooter({
 
   return (
     <>
-      {/* ── Ad Banner 3 — Above Footer ── */}
-      <AdBanner adSlot={AD_SLOT_FOOTER} adFormat="horizontal" style={{ margin: '0 auto', maxWidth: '970px', padding: '10px 20px' }} />
-
       <footer>
         <div className="footer-main">
           <div>

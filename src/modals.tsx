@@ -137,7 +137,6 @@ export function PrivacyPolicyModal({ onClose }: { onClose: () => void }) {
           <h3>4. Third-Party Services & SDKs</h3>
           <p>Our application and website integrate the following third-party services, each with their own privacy practices:</p>
           <ul>
-            <li><strong>Google AdSense:</strong> Displays advertising on our website. Google may use cookies to serve relevant ads. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--emerald)' }}>Google's Privacy Policy</a>.</li>
             <li><strong>Google Analytics (if enabled):</strong> Anonymous traffic analysis. Data is anonymised before processing.</li>
           </ul>
           <p>We do not sell, rent, or trade your personal or financial data to any third parties or advertising brokers beyond the disclosures above.</p>
