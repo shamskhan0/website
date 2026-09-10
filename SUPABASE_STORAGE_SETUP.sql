@@ -35,6 +35,19 @@ create policy "update cloud_data" on cloud_data for update using (true) with che
 --                       image/svg+xml, image/avif
 -- Phir Storage → media → Policies → New policy (or run these, storage
 -- policies CAN run in SQL editor on storage.objects):
+-- Existing bucket ki MIME restrictions ko bhi explicitly update karein:
+update storage.buckets
+set public = true,
+    allowed_mime_types = array[
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+      'image/avif'
+    ],
+    file_size_limit = 10485760
+where id = 'media';
+
 create policy "media public read"
   on storage.objects for select
   using (bucket_id = 'media');
