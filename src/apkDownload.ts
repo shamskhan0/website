@@ -41,7 +41,8 @@ export async function downloadApkFile(
     // Verify Firebase Storage or another permanent URL before downloading.
     const primaryUrl = new URL(url, window.location.origin).href
     const isFirebaseStorageUrl = primaryUrl.includes('firebasestorage.googleapis.com') || primaryUrl.includes('storage.googleapis.com')
-    if (isFirebaseStorageUrl) {
+    const isGitHubReleaseAsset = primaryUrl.includes('github.com/') && primaryUrl.includes('/releases/download/')
+    if (isFirebaseStorageUrl || isGitHubReleaseAsset) {
       const anchor = document.createElement('a')
       anchor.href = primaryUrl
       anchor.download = fallbackName

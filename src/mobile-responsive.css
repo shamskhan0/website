@@ -301,6 +301,8 @@ html {
     overflow-x: auto;
   }
   .desktop-viewport.force-desktop .desktop-canvas {
+    width: 100%;
+    min-width: 0;
     transform: none;
   }
 }

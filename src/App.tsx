@@ -483,8 +483,13 @@ function App() {
   const adminLoggedIn = currentUser !== null
   const [activeAdmin, setActiveAdmin] = useState('Dashboard')
 
-  // Live active APK
-  const liveApk = apkVersions.find((v) => v.status === 'LIVE') || apkVersions[0]
+  // Live active APK. Settings carries the published URL as a fallback while
+  // the APK history document is still being synced to a new browser.
+  const storedLiveApk = apkVersions.find((v) => v.status === 'LIVE') || apkVersions[0]
+  const liveApk = storedLiveApk.downloadUrl.startsWith('/roshan-digital-') &&
+    siteSettings.apkDownloadUrl && !siteSettings.apkDownloadUrl.startsWith('/roshan-digital-')
+    ? { ...storedLiveApk, downloadUrl: siteSettings.apkDownloadUrl }
+    : storedLiveApk
 
   const handleLogin = (user: AdminUser) => {
     setCurrentUser(user)

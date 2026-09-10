@@ -106,7 +106,12 @@ export async function uploadImage(
     return { error: error instanceof Error ? error.message : 'Invalid image file.' }
   }
   onProgress?.(15, 'optimizing')
-  const optimized = await optimizeImage(file, image)
+  let optimized: { blob: Blob; format: string }
+  try {
+    optimized = await optimizeImage(file, image)
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Image optimization failed.' }
+  }
   const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${optimized.format}`
   const path = `${folder}/${safeName}`
   onProgress?.(30, 'uploading')
