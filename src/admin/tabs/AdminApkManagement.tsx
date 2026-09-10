@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ApkVersion } from '../../types'
 import { promoteToLive } from '../apkStatus'
-import { uploadFile } from '../../supabase'
+import { uploadFile } from '../../firebase'
 import { pushCloudData, pushCloudSettings, cloudSyncEnabled } from '../../cloudSync'
 import { downloadApkFile } from '../../apkDownload'
 import type { SiteSettings } from '../../types'
@@ -55,9 +55,9 @@ export function AdminApkManagement({
     }
 
     setIsUploading(true)
-    setStatus('APK Supabase Storage par upload ho rahi hai… (150MB tak me waqt lag sakta hai)')
+    setStatus('APK Firebase Storage par upload ho rahi hai… (150MB tak me waqt lag sakta hai)')
 
-    // STEP 1: Real upload to Supabase Storage
+    // STEP 1: Real upload to Firebase Storage
     const result = await uploadFile(selectedFile, 'apk')
     if ('error' in result) {
       setIsUploading(false)
@@ -79,7 +79,7 @@ export function AdminApkManagement({
       downloads: 0,
       sha256: Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
       changelog: changelogText.split('\n').filter((line) => line.trim().length > 0),
-      downloadUrl: result.url, // ✅ REAL Supabase Storage URL — ab APK hi download hogi
+      downloadUrl: result.url, // ✅ REAL Firebase Storage URL — ab APK hi download hogi
     }
 
     let updatedList = apkVersions
@@ -267,7 +267,7 @@ export function AdminApkManagement({
               {isUploading ? 'Deploying… (upload + DB save chal raha hai)' : '🚀 Deploy & Publish APK ↗'}
             </button>
             <small style={{ display: 'block', marginTop: '8px', color: '#94a3b8' }}>
-              Deploy dabate hi APK Supabase Storage par upload ho kar database mein save hogi — website ka download button phir direct ye APK download karega.
+              Deploy dabate hi APK Firebase Storage par upload ho kar database mein save hogi — website ka download button phir direct ye APK download karega.
             </small>
           </div>
         </form>

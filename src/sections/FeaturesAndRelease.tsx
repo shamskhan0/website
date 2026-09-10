@@ -91,7 +91,7 @@ export function AppReleaseSection({
             ))}
           </ul>
         </div>
-        {/* APK version section se connected: LIVE APK ka real Supabase Storage URL.
+        {/* APK version section se connected: LIVE APK ka real Firebase Storage URL.
             ApkDownloadButton: structured result + failure par retry UI dikhata hai. */}
         <ApkDownloadButton liveApk={liveApk} className="button button-light" label="Download latest APK" />
         <small className="android-note">For Android {liveApk.minAndroid} · APK file</small>

@@ -413,7 +413,7 @@ function App() {
     if (batch.apk_versions && isApkVersions(batch.apk_versions)) setApkVersions(batch.apk_versions)
   }
 
-  // Admin edits are shared through Supabase Realtime, with storage as a
+  // Admin edits are shared through Firestore snapshots, with storage as a
   // same-browser fallback. Every visitor receives the latest published data.
   const refreshCloudContent = () => {
     void fetchAllCloudBatch().then((batch) => {

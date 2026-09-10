@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
-import { deleteImageByUrl, uploadImage, type UploadStage } from '../../supabase'
+import { deleteImageByUrl, uploadImage, type UploadStage } from '../../firebase'
 import { OptimizedImage } from '../../components/OptimizedImage'
 
 const IMAGE_CONFIG = [
@@ -143,7 +143,7 @@ export function AdminWebsiteSettings({
         [key]: nextImage,
       },
     }))
-    setStatusMessage(`${key.replace(/_/g, ' ')} uploaded to Supabase Storage. Press "Save Website Settings" to publish it on the live site.`)
+    setStatusMessage(`${key.replace(/_/g, ' ')} uploaded to Firebase Storage. Press "Save Website Settings" to publish it on the live site.`)
 
     // Safe replace: DB already points to the NEW url before the old file is removed.
     if (oldUrl && oldUrl !== result.url) {

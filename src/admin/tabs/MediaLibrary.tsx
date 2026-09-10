@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ManagedImage, SiteSettings } from '../../types'
-import { deleteImageByUrl, uploadImage, type UploadStage } from '../../supabase'
+import { deleteImageByUrl, uploadImage, type UploadStage } from '../../firebase'
 import { OptimizedImage } from '../../components/OptimizedImage'
 
 const MEDIA_LIBRARY_DEFS = [
@@ -222,7 +222,7 @@ export function MediaLibrary({ settings, onSave, onPublishAll }: { settings: Sit
       },
     }))
 
-    setStatusMessage(`${key.replace(/_/g, ' ')} uploaded to Supabase Storage. Press "Save Media Library" to publish it on the live site.`)
+    setStatusMessage(`${key.replace(/_/g, ' ')} uploaded to Firebase Storage. Press "Save Media Library" to publish it on the live site.`)
 
     // Safe replace: new URL saved first, old storage file removed after.
     if (oldUrl && oldUrl !== result.url) {

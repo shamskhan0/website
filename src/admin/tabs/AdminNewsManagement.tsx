@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FeatureItem, NewsItem } from '../../types'
-import { uploadImage, type UploadStage } from '../../supabase'
+import { uploadImage, type UploadStage } from '../../firebase'
 import { OptimizedImage } from '../../components/OptimizedImage'
 
 export function AdminNewsManagement({
@@ -585,7 +585,7 @@ export function AdminNewsManagement({
         <div className="admin-card-header">
           <div>
             <h3>🚀 Publish to Website</h3>
-            <p>Ek click mein Features + News database (Supabase) mein save ho kar live website par show honge — har browser/device par.</p>
+            <p>Ek click mein Features + News Firebase database mein save ho kar live website par show honge — har browser/device par.</p>
           </div>
         </div>
         <button
@@ -597,7 +597,7 @@ export function AdminNewsManagement({
           {publishing ? 'Publishing…' : <>✅ Save & Publish Features + News <span>→</span></>}
         </button>
         <small style={{ display: 'block', marginTop: '10px', color: '#94a3b8' }}>
-          Ye button sab feature cards aur news articles Supabase database mein save karta hai. Upload ki gayi pictures bhi automatically live ho jati hain.
+              Ye button sab feature cards aur news articles Firebase database mein save karta hai. Upload ki gayi pictures bhi automatically live ho jati hain.
         </small>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { checkAdminCredentials, type AdminUser } from './auth'
+import { signInAdmin, type AdminUser } from './auth'
 import { DashboardTab } from './tabs/DashboardTab'
 import { AdminApkManagement } from './tabs/AdminApkManagement'
 import { AdminVersionHistory } from './tabs/AdminVersionHistory'
@@ -23,7 +23,7 @@ function useCloudSave(setSiteSettings: (s: SiteSettings) => void) {
         ? `${label} saved & synced to the live website — sab users ko nazar aayega.`
         : `${label} saved locally, lekin cloud sync FAIL hui. Internet check karein.`
     }
-    return `${label} saved locally. Supabase cloud sync is not configured, so other visitors will not see this change yet.`
+    return `${label} saved locally. Firebase cloud sync is not configured, so other visitors will not see this change yet.`
   }
 }
 
@@ -42,7 +42,7 @@ export function AdminLogin({ onLogin, onExit, brandLogoUrl }: { onLogin: (user: 
     setError('')
     setIsChecking(true)
 
-    const matchedUser = await checkAdminCredentials(email.trim().toLowerCase(), password.trim())
+    const matchedUser = await signInAdmin(email.trim().toLowerCase(), password.trim())
     setIsChecking(false)
 
     if (matchedUser) {
@@ -321,7 +321,7 @@ export function AdminDashboard({
             onPublishAll={async (newSettings) => {
               setSiteSettings(newSettings)
               if (!cloudSyncEnabled) {
-                return 'Saved locally. (Cloud sync configured nahi hai — VITE_SUPABASE_URL aur VITE_SUPABASE_ANON_KEY .env mein set karein.)'
+                return 'Saved locally. (Firebase cloud sync configured nahi hai — VITE_FIREBASE_* values .env mein set karein.)'
               }
               // Sab kuch ek saath cloud par publish karo: settings + features + news + APK
               const results = await Promise.all([
