@@ -1,0 +1,49 @@
+# Base44 sandbox / development environment for Roshan Digital (Vite + React SPA).
+#
+# The app is a purely client-side Vite application: it has no server of its own.
+# Cloud features (admin login, shared content, media/APK uploads) talk to Firebase
+# and Supabase directly from the browser, configured through VITE_* variables
+# delivered by the platform in /run/base44/app.env. Without them the app still
+# runs on its built-in defaults + localStorage.
+#
+# Run: docker compose -f docker-compose.base44.yml up -d --build
+# Dev server: http://localhost:3000 (preview proxy -> host port 3000)
+
+services:
+  web:
+    # Plain runtime base image + bind-mounted source: edits are picked up by
+    # Vite's dev server without rebuilding the image.
+    image: node:22-bookworm-slim
+    working_dir: /app
+    restart: on-failure
+    command:
+      - sh
+      - -ec
+      - |
+        npm ci --no-audit --no-fund --prefer-offline
+        exec npm run dev -- --host 0.0.0.0 --port 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    environment:
+      # Pass through so sandbox-only behaviour can be gated on an exact "1" check.
+      - BASE44_PREVIEW_MODE
+      # Set by the platform: Vite >= 6.1 appends this to server.allowedHosts so the
+      # preview proxy host is accepted.
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
+    # Optional external credentials (Firebase web config, Supabase URL + publishable
+    # key). Listed LAST so dashboard values always win, and never duplicated under
+    # environment: (which would permanently outrank the platform-managed file).
+    env_file:
+      - /run/base44/app.env
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 120s
