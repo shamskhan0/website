@@ -30,6 +30,12 @@ Without any of them the app still boots and the whole public site works from `sr
 localStorage persistence. What does **not** work without credentials: admin panel login, cloud content
 sync, image/APK uploads.
 
+`VITE_SUPABASE_URL` must be the full project URL (`https://<project-ref>.supabase.co`) and
+`VITE_SUPABASE_STORAGE_BUCKET` a bucket name only (e.g. `media`). A bare project ref or a URL in the
+bucket field is a misconfiguration: `createClient` used to throw and leave the page blank, so
+`src/firebase.ts` now ignores a non-http(s) URL (logs a console warning and disables Supabase) instead of
+crashing the site.
+
 Credentials are delivered by the platform to `/run/base44/app.env`, listed as the **last**
 `env_file:` entry in compose. Never move these keys under compose `environment:` — that would permanently
 outrank a value the user sets later in the dashboard. Vite picks `VITE_*` values up from the process
