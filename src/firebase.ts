@@ -26,7 +26,13 @@ export const firebaseEnabled = requiredFirebaseConfig.every(Boolean)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? ''
 const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? ''
 const supabaseBucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET ?? 'media'
-export const supabaseStorageEnabled = Boolean(supabaseUrl && supabasePublishableKey)
+// A malformed VITE_SUPABASE_URL makes createClient throw, which would leave the
+// whole site blank. Treat anything that is not an http(s) URL as not configured.
+const validSupabaseUrl = /^https?:\/\/\S+$/i.test(supabaseUrl.trim())
+if (supabaseUrl && !validSupabaseUrl) {
+  console.warn('VITE_SUPABASE_URL is not a valid http(s) URL — Supabase storage and sync are disabled.')
+}
+export const supabaseStorageEnabled = validSupabaseUrl && Boolean(supabasePublishableKey)
 const supabase = supabaseStorageEnabled ? createClient(supabaseUrl, supabasePublishableKey) : null
 export const cloudStorageEnabled = firebaseEnabled || supabaseStorageEnabled
 const app = firebaseEnabled ? initializeApp(firebaseConfig) : null
